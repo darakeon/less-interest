@@ -1,15 +1,11 @@
 from math import ceil
 from json import loads
 
-#table = []
-
-def main():
-    with open('config.json') as file:
-        config = loads(file.read())
-        print(config)
-
+def main(config, print_simulation):
     total_interest = 0
     reinstallments = []
+
+    simulation = []
 
     currency = config['currency']
     balances_pt = config['balances_pt']
@@ -26,7 +22,7 @@ def main():
     initial_installments_delays = config['initial_installments_delays']
 
     for m, month in enumerate(months):
-        #table.append([])
+        simulation.append([])
 
         if len(c6_installments) <= m:
             c6_installments.append(0)
@@ -34,57 +30,40 @@ def main():
         if len(reinstallments) <= m:
             reinstallments.append(0)
 
-        print(f"month: {month}")
-        #table[m].append(month)
+        simulation[m].append(f"month: {month}")
 
-        print(f"nubank_installments: {nubank_installments[m]}")
-        #table[m].append(nubank_installments[m])
+        simulation[m].append(f"nubank_installments: {nubank_installments[m]}")
         nubank_limit = nubank_limit + nubank_installments[m]
-        print(f"nubank_limit: {nubank_limit:.2f}")
-        #table[m].append(nubank_limit)
+        simulation[m].append(f"nubank_limit: {nubank_limit:.2f}")
 
-        print(f"c6_installments: {c6_installments[m]}")
-        #table[m].append(c6_installments[m])
+        simulation[m].append(f"c6_installments: {c6_installments[m]}")
         c6_limit = c6_limit + c6_installments[m]
-        print(f"c6_limit: {c6_limit}")
-        #table[m].append(c6_limit)
+        simulation[m].append(f"c6_limit: {c6_limit}")
 
         limit = nubank_limit + c6_limit
-        print(f"limit: {limit:.2f}")
-        #table[m].append(limit)
+        simulation[m].append(f"limit: {limit:.2f}")
 
-        print(f"salary: {salary[m]}")
-        #table[m].append(salary[m])
-        print(f"spent_pt: {spent_pt[m]}")
-        #table[m].append(spent_pt[m])
+        simulation[m].append(f"salary: {salary[m]}")
+        simulation[m].append(f"spent_pt: {spent_pt[m]}")
 
         balance_pt = balances_pt[m]
 
-        print(f"balance_pt: {balance_pt}")
-        #table[m].append(balance_pt)
+        simulation[m].append(f"balance_pt: {balance_pt}")
 
         balance_pt = balance_pt + salary[m] - spent_pt[m]
-        print(f"balance_pt_left: {balance_pt:.2f}")
-        #table[m].append(balance_pt)
+        simulation[m].append(f"balance_pt_left: {balance_pt:.2f}")
 
         balance_pt_br = balance_pt * currency
-        print(f"balance_pt_br: {balance_pt_br:.2f}")
-        #table[m].append(balance_pt_br)
+        simulation[m].append(f"balance_pt_br: {balance_pt_br:.2f}")
 
-        print(f"salary_br: {0}")
-        #table[m].append(0)
-        print(f"spent_br: {spent_br[m]}")
-        #table[m].append(spent_br[m])
-        print(f"nubank_installments: {nubank_installments[m]}")
-        #table[m].append(nubank_installments[m])
-        print(f"c6_installments: {c6_installments[m]}")
-        #table[m].append(c6_installments[m])
-        print(f"reinstallments: {reinstallments[m]:.2f}")
-        #table[m].append(reinstallments[m])
+        simulation[m].append(f"salary_br: {0}")
+        simulation[m].append(f"spent_br: {spent_br[m]}")
+        simulation[m].append(f"nubank_installments: {nubank_installments[m]}")
+        simulation[m].append(f"c6_installments: {c6_installments[m]}")
+        simulation[m].append(f"reinstallments: {reinstallments[m]:.2f}")
 
         balance_br = spent_br[m] + nubank_installments[m] + c6_installments[m] + reinstallments[m]
-        print(f"balance_br: {balance_br:.2f}")
-        #table[m].append(balance_br)
+        simulation[m].append(f"balance_br: {balance_br:.2f}")
 
         if balance_br > balance_pt_br:
             reinstallment = balance_br - balance_pt_br
@@ -99,8 +78,7 @@ def main():
             installment_delay = 0
             interest = 0
 
-        print(f"reinstallent: {reinstallment:.2f}")
-        #table[m].append(reinstallment)
+        simulation[m].append(f"reinstallent: {reinstallment:.2f}")
 
         reinstallent_total = ceil((reinstallment * interest) / installment_count * 100) * installment_count / 100
 
@@ -112,15 +90,12 @@ def main():
 
         reinstallent_part = reinstallent_total / installment_count
 
-        print(f"reinstallent_total: {reinstallent_total:.2f}")
-        #table[m].append(reinstallent_total)
-        print(f"reinstallent_part: {reinstallent_part:.2f}")
-        #table[m].append(reinstallent_part)
+        simulation[m].append(f"reinstallent_total: {reinstallent_total:.2f}")
+        simulation[m].append(f"reinstallent_part: {reinstallent_part:.2f}")
 
         balance_pt = round((balance_pt_br - balance_br + reinstallment) / currency, 2)
         balances_pt.append(balance_pt)
 
-        #reinstallments[m+1] += reinstallment
         nubank_limit -= reinstallent_total
 
         next_reinstallment = m + 1 + installment_delay
@@ -130,16 +105,26 @@ def main():
         for i in range(installment_count):
             reinstallments[i + next_reinstallment] += reinstallent_part
 
-        print()
+    simulation.append(f"total_interest: {total_interest:.2f}")
 
-    print(f"total_interest: {total_interest:.2f}")
+    if print_simulation:
+        for month in simulation[:-1]:
+            for data in month:
+                print(data)
+            print()
+        print(simulation[-1])
+
+    return simulation
 
     #for row in table:
     #    for cel in row:
     #        if isinstance(cel, float):
-    #            print(f"{cel:.2f}", end=" ")
+    #            simulation[m].append(f"{cel:.2f}", end=" ")
     #        else:
-    #            print(cel, end=" ")
-    #    print()
+    #            simulation[m].append(cel, end=" ")
+    #    simulation[m].append()
 
-main()
+with open('config.json') as file:
+    config = loads(file.read())
+
+main(config, False)
