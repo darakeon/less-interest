@@ -1,1 +1,5 @@
 config.json
+
+.vs
+bin
+obj

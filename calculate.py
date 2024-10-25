@@ -124,7 +124,7 @@ def main(config, print_simulation):
     #            simulation[m].append(cel, end=" ")
     #    simulation[m].append()
 
-with open('config.json') as file:
+with open('LessInterest/LessInterest/config.json') as file:
     config = loads(file.read())
 
 main(config, False)
