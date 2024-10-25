@@ -6,7 +6,7 @@ namespace LessInterest
 	{
 		public static void Main(String[] args)
 		{
-			var configJson = 
+			var configJson =
 				File.ReadAllText("config.json")
 					.Replace("_", "");
 
@@ -23,6 +23,11 @@ namespace LessInterest
 				}
 				Console.WriteLine();
 			}
+			
+			foreach (var summary in simulation.summaries)
+			{
+				Console.WriteLine(summary);
+			}
 		}
 
 		private static Report process(Config config, Boolean printSimulation)
@@ -32,63 +37,63 @@ namespace LessInterest
 
 			var simulation = new Report();
 
-			var currency = config.Currency;
 			var balancesPt = config.BalancesPT;
-			var months = config.Months;
-			var salary = config.Salary;
-			var spentPt = config.SpentPT;
-			var spentBr = config.SpentBR;
 			var nubankLimit = config.NubankLimit;
-			var nubankInstallments = config.NubankInstallments;
 			var c6Limit = config.C6Limit;
-			var c6Installments = config.C6Installments;
-			var interests = config.Interests;
-			var initialInstallmentsCounts = config.InitialInstallmentsCounts;
-			var initialInstallmentsDelays = config.InitialInstallmentsDelays;
+			var installmentsCounts = config.InitialInstallmentsCounts;
+			var installmentsDelays = config.InitialInstallmentsDelays;
 
-			for (var m = 0; m < months.Count; m++)
+			for (var m = 0; m < config.Months.Count; m++)
 			{
-				var month = months[m];
-
-				if (c6Installments.Count <= m)
-					c6Installments.Add(0);
+				var month = config.Months[m];
 
 				if (reInstallments.Count <= m)
 					reInstallments.Add(0);
 
+				if (config.C6Installments.Count <= m)
+					config.C6Installments.Add(0);
+
+				if (config.NubankInstallments.Count <= m)
+					config.NubankInstallments.Add(0);
+
 				simulation.Add(m, new Field("month", month));
 
-				simulation.Add(m, new Field("nubank_installments", nubankInstallments[m]));
-				nubankLimit += nubankInstallments[m];
+				simulation.Add(m, new Field("nubank_installments", config.NubankInstallments[m]));
+				nubankLimit += config.NubankInstallments[m];
 				simulation.Add(m, new Field("nubank_limit", nubankLimit));
 
-				simulation.Add(m, new Field("c6_installments", c6Installments[m]));
-				c6Limit += c6Installments[m];
+				simulation.Add(m, new Field("c6_installments", config.C6Installments[m]));
+				c6Limit += config.C6Installments[m];
 				simulation.Add(m, new Field("c6_limit", c6Limit));
 
 				var limit = nubankLimit + c6Limit;
 				simulation.Add(m, new Field("limit", limit));
 
-				simulation.Add(m, new Field("salary", salary[m]));
-				simulation.Add(m, new Field("spent_pt", spentPt[m]));
+				simulation.Add(m, new Field("salary", config.Salary[m]));
+				simulation.Add(m, new Field("spent_pt", config.SpentPT[m]));
 
 				var balancePt = balancesPt[m];
 
 				simulation.Add(m, new Field("balance_pt", balancePt));
 
-				balancePt = balancePt + salary[m] - spentPt[m];
+				balancePt = balancePt + config.Salary[m] - config.SpentPT[m];
 				simulation.Add(m, new Field("balance_pt_left", balancePt));
 
-				var balancePtBr = balancePt * currency;
+				var balancePtBr = balancePt * config.Currency;
 				simulation.Add(m, new Field("balance_pt_br", balancePtBr));
 
 				simulation.Add(m, new Field("salary_br", 0));
-				simulation.Add(m, new Field("spent_br", spentBr[m]));
-				simulation.Add(m, new Field("nubank_installments", nubankInstallments[m]));
-				simulation.Add(m, new Field("c6_installments", c6Installments[m]));
+				simulation.Add(m, new Field("spent_br", config.SpentBR[m]));
+				simulation.Add(m, new Field("nubank_installments", config.NubankInstallments[m]));
+				simulation.Add(m, new Field("c6_installments", config.C6Installments[m]));
 				simulation.Add(m, new Field("reInstallments", reInstallments[m]));
 
-				var balanceBr = spentBr[m] + nubankInstallments[m] + c6Installments[m] + reInstallments[m];
+				var balanceBr =
+					config.SpentBR[m]
+					+ config.NubankInstallments[m]
+					+ config.C6Installments[m]
+					+ reInstallments[m];
+
 				simulation.Add(m, new Field("balance_br", balanceBr));
 
 				var reInstallment = 0m;
@@ -100,9 +105,9 @@ namespace LessInterest
 				{
 					reInstallment = balanceBr - balancePtBr;
 
-					installmentCount = initialInstallmentsCounts[m];
-					installmentDelay = initialInstallmentsDelays[m];
-					interest = interests[installmentCount - 1][installmentDelay];
+					installmentCount = installmentsCounts[m];
+					installmentDelay = installmentsDelays[m];
+					interest = config.Interests[installmentCount - 1][installmentDelay];
 				}
 
 				simulation.Add(m, new Field("re_installment", reInstallment));
@@ -124,7 +129,7 @@ namespace LessInterest
 				simulation.Add(m, new Field("re_installment_total", reInstallmentTotal));
 				simulation.Add(m, new Field("re_installment_part", reInstallmentPart));
 
-				balancePt = Math.Round((balancePtBr - balanceBr + reInstallment) / currency, 2);
+				balancePt = Math.Round((balancePtBr - balanceBr + reInstallment) / config.Currency, 2);
 				balancesPt.Add(balancePt);
 
 				nubankLimit -= reInstallmentTotal;
