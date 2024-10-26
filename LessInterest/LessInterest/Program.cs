@@ -9,14 +9,16 @@ public class Program
 		var balancesPt = config.BalancesPT;
 		var nubankLimit = config.NubankLimit;
 		var c6Limit = config.C6Limit;
-		var installmentsCounts = config.InitialInstallmentsCounts;
-		var installmentsDelays = config.InitialInstallmentsDelays;
 
 		var simulator = new Simulator(config, false);
-		var simulation = simulator.Process(
-			balancesPt, nubankLimit, c6Limit,
-			installmentsCounts, installmentsDelays
+		var simulation = simulator.ProcessAll(
+			balancesPt, nubankLimit, c6Limit
 		);
+
+		Console.ReadLine();
+
+		if (simulation == null)
+			return;
 			
 		var transposed = simulation.Transpose();
 

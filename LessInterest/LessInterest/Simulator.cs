@@ -13,27 +13,46 @@ public class Simulator(Config config, Boolean printSimulation)
 		var totalInterest = 0m;
 		var reInstallments = new List<Decimal>();
 
-		var simulation = new Report();
-
 		return process(
 			0,
 			balancesPt, nubankLimit, c6Limit,
 			installmentsCounts, installmentsDelays,
 			installmentsCounts[0], installmentsDelays[0],
-			totalInterest, reInstallments, simulation
+			totalInterest, reInstallments, new Report()
+		)!;
+	}
+
+	public Report? ProcessAll(
+		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit
+	)
+	{
+		var totalInterest = 0m;
+		var reInstallments = new List<Decimal>();
+
+		return oneOrAll(
+			(count, delay) => process(
+				0,
+				balancesPt, nubankLimit, c6Limit,
+				null, null,
+				count, delay,
+				totalInterest, reInstallments, new Report()
+			)
 		);
 	}
 
-	private Report process(
+	private Report? process(
 		Int32 monthIndex,
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
-		IList<Int32> installmentsCounts, IList<Int32> installmentsDelays,
+		IList<Int32>? installmentsCounts, IList<Int32>? installmentsDelays,
 		Int32 installmentCount, Int32 installmentDelay,
 		Decimal totalInterest, IList<Decimal> reInstallments, Report simulation
 	)
 	{
 		var monthLabel = config.Months[monthIndex];
 		var nextMonthIndex = monthIndex + 1;
+
+		var dashes = new String('-', monthIndex);
+		Console.Write($"{dashes} {monthLabel} {installmentCount}x after {installmentDelay} months:");
 
 		if (reInstallments.Count <= monthIndex)
 			reInstallments.Add(0);
@@ -101,9 +120,16 @@ public class Simulator(Config config, Boolean printSimulation)
 
 		if (reInstallmentTotal > limit)
 		{
+			if (installmentsCounts == null && installmentsDelays == null)
+			{
+				Console.WriteLine(" WRONG");
+				return null;
+			}
+
 			reInstallmentTotal = limit;
 			reInstallment = reInstallmentTotal / interest;
 		}
+		Console.WriteLine();
 
 		totalInterest += (reInstallmentTotal - reInstallment);
 
@@ -137,13 +163,52 @@ public class Simulator(Config config, Boolean printSimulation)
 
 		if (nextMonthIndex == config.Months.Count)
 			return simulation;
-
-		return process(
-			nextMonthIndex,
-			balancesPt, nubankLimit, c6Limit,
-			installmentsCounts, installmentsDelays,
-			installmentsCounts[nextMonthIndex], installmentsDelays[nextMonthIndex],
-			totalInterest, reInstallments, simulation
+		
+		return oneOrAll(
+			(count, delay) => process(
+				nextMonthIndex,
+				balancesPt, nubankLimit, c6Limit,
+				installmentsCounts, installmentsDelays,
+				count, delay,
+				totalInterest, reInstallments, simulation
+			),
+			nextMonthIndex, installmentsCounts, installmentsDelays
 		);
+	}
+
+	private Report? oneOrAll(
+		Func<Int32, Int32, Report?> execute,
+		Int32? index = null, IList<Int32>? counts = null, IList<Int32>? delays = null
+	)
+	{
+		if (
+			index.HasValue
+			&& counts != null
+			&& delays != null
+			&& counts.Count > index
+			&& delays.Count > index
+		)
+		{
+			return execute(counts[index.Value], delays[index.Value]);
+		}
+
+		Report? chosen = null;
+
+		for (var delay = 0; delay <= 2; delay++)
+		{
+			for (var count = 1; count <= 12; count++)
+			{
+				var simulation = execute(count, delay);;
+
+				if (simulation == null) continue;
+
+				if (chosen == null || chosen.Total.Decimal > simulation.Total.Decimal)
+				{
+					chosen = simulation;
+				}
+			}
+		}
+
+		return chosen;
 	}
 }
