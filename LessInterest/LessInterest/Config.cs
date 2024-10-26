@@ -6,8 +6,10 @@ public class Config
 {
 	public static Config Init()
 	{
+		var configPath = Path.Combine("configs", "config.json");
+
 		var configJson =
-			File.ReadAllText("config.json")
+			File.ReadAllText(configPath)
 				.Replace("_", "");
 
 		return JsonConvert.DeserializeObject<Config>(configJson)!;
