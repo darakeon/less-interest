@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Tests.LessInterest;
 
-public class SimulationTest
+public class SimulatorTest
 {
 	[SetUp]
 	public void Setup() { }
