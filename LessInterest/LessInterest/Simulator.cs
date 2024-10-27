@@ -13,51 +13,43 @@ public class Simulator(
 		IList<Int32> installmentsCounts, IList<Int32> installmentsDelays
 	)
 	{
-		var totalInterest = 0m;
-		var reInstallments = new List<Decimal>();
-
-		return process(
-			0,
-			balancesPt, nubankLimit, c6Limit,
-			installmentsCounts, installmentsDelays,
-			installmentsCounts[0], installmentsDelays[0],
-			totalInterest, reInstallments, new Simulation(),
-			true
-		)!;
+		return process(balancesPt, nubankLimit, c6Limit, false, false)!;
 	}
 
 	public Simulation? ProcessAll(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit
 	)
 	{
-		var totalInterest = 0m;
-		var reInstallments = new List<Decimal>();
-
 		return oneOrAll(
 			(count, delay) => process(
-				0,
-				balancesPt, nubankLimit, c6Limit,
-				null, null,
-				count, delay,
-				totalInterest, reInstallments, new Simulation(),
-				true
+				balancesPt, nubankLimit, c6Limit, true, true, count, delay
 			)
 		);
 	}
 
 	private Simulation? process(
-		Int32 monthIndex,
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
-		IList<Int32>? installmentsCounts, IList<Int32>? installmentsDelays,
-		Int32 installmentCount, Int32 installmentDelay,
-		Decimal totalInterest, IList<Decimal> reInstallments, Simulation simulation,
-		Boolean isTarget
+		Boolean stopOutOfLimit, Boolean isMulti,
+		Int32? chosenInstallmentCount = null, Int32? chosenInstallmentDelay = null,
+		Decimal totalInterest = 0, IList<Decimal>? reInstallments = null,
+		Simulation? simulation = null, Boolean isTarget = true
 	)
 	{
-		simulation = simulation.NewMonth();
+		simulation = simulation == null
+			? new Simulation()
+			: simulation.NewMonth();
+
+		var monthIndex = simulation.MonthIndex;
+		var nextMonthIndex = monthIndex + 1;
+
+		var installmentCount = chosenInstallmentCount ?? config.InitialInstallmentsCounts[monthIndex];
+		var installmentDelay = chosenInstallmentDelay ?? config.InitialInstallmentsDelays[monthIndex];
+
+		reInstallments = reInstallments == null
+			? new List<Decimal>()
+			: reInstallments.ToList();
 
 		simulation.MonthLabel = config.Months[monthIndex];
-		var nextMonthIndex = monthIndex + 1;
 
 		isTarget = isTarget
 		    && config.InitialInstallmentsCounts[monthIndex] == installmentCount
@@ -65,7 +57,7 @@ public class Simulator(
 
 		if (isTarget)
 		{
-			Console.WriteLine($"{new String('-', monthIndex)} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
+			write($"{new String('-', monthIndex + 1)} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 		}
 
 		if (reInstallments.Count <= monthIndex)
@@ -129,10 +121,10 @@ public class Simulator(
 
 		if (simulation.ReInstallmentTotal > simulation.Limit)
 		{
-			if (installmentsCounts == null && installmentsDelays == null)
+			if (stopOutOfLimit)
 			{
 				if (isTarget)
-					Console.WriteLine("WRONG");
+					write("WRONG");
 				return null;
 			}
 
@@ -175,33 +167,24 @@ public class Simulator(
 
 		var childSimulation = oneOrAll(
 			(count, delay) => process(
-				nextMonthIndex,
 				balancesPt, simulation.NubankNewLimit, simulation.C6Limit,
-				installmentsCounts, installmentsDelays,
+				stopOutOfLimit, isMulti,
 				count, delay,
-				totalInterest, reInstallments, simulation,
-				isTarget
-			),
-			nextMonthIndex, installmentsCounts, installmentsDelays
+				totalInterest, reInstallments,
+				simulation, isTarget
+			), isMulti
 		);
 
 		return childSimulation;
 	}
 
 	private Simulation? oneOrAll(
-		Func<Int32, Int32, Simulation?> execute,
-		Int32? index = null, IList<Int32>? counts = null, IList<Int32>? delays = null
+		Func<Int32?, Int32?, Simulation?> execute, Boolean isMulti = true
 	)
 	{
-		if (
-			index.HasValue
-			&& counts != null
-			&& delays != null
-			&& counts.Count > index
-			&& delays.Count > index
-		)
+		if (!isMulti)
 		{
-			return execute(counts[index.Value], delays[index.Value]);
+			return execute(null, null);
 		}
 
 		Simulation? chosen = null;
