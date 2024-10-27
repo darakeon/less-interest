@@ -4,9 +4,11 @@ namespace LessInterest;
 
 public class Simulation : Report
 {
-	private Int32 position = -1;
-
-	public Simulation() { }
+	public Simulation()
+	{
+		table.Add(new List<Field>());
+		MonthIndex = 0;
+	}
 
 	private Simulation(Simulation original)
 	{
@@ -20,13 +22,15 @@ public class Simulation : Report
 		}
 
 		table.Add(new List<Field>());
-		position = original.position + 1;
+		MonthIndex = original.MonthIndex + 1;
 	}
 
 	public Simulation NewMonth()
 	{
 		return new Simulation(this);
 	}
+
+	public Int32 MonthIndex { get; }
 
 	public String MonthLabel
 	{
@@ -162,7 +166,7 @@ public class Simulation : Report
 
 	private void add(String value, [CallerMemberName] String name = "")
 	{
-		table[position].Add(new Field(name, value));
+		table[MonthIndex].Add(new Field(name, value));
 	}
 
 	private void add(Decimal value, [CallerMemberName] String name = "")
@@ -170,7 +174,7 @@ public class Simulation : Report
 		var field = get(name);
 
 		if (field == null)
-			table[position].Add(new Field(name, value));
+			table[MonthIndex].Add(new Field(name, value));
 		else
 			field.Number = value;
 	}
@@ -187,7 +191,7 @@ public class Simulation : Report
 
 	private Field? get([CallerMemberName] String name = "")
 	{
-		return table[position].FirstOrDefault(f => f.Name == name);
+		return table[MonthIndex].FirstOrDefault(f => f.Name == name);
 	}
 
 	private Field create(Decimal value, [CallerMemberName] String name = "")
