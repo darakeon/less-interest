@@ -18,7 +18,8 @@ public class Simulator(Config config, Boolean printSimulation)
 			balancesPt, nubankLimit, c6Limit,
 			installmentsCounts, installmentsDelays,
 			installmentsCounts[0], installmentsDelays[0],
-			totalInterest, reInstallments, new Simulation()
+			totalInterest, reInstallments, new Simulation(),
+			true
 		)!;
 	}
 
@@ -35,7 +36,8 @@ public class Simulator(Config config, Boolean printSimulation)
 				balancesPt, nubankLimit, c6Limit,
 				null, null,
 				count, delay,
-				totalInterest, reInstallments, new Simulation()
+				totalInterest, reInstallments, new Simulation(),
+				true
 			)
 		);
 	}
@@ -45,7 +47,8 @@ public class Simulator(Config config, Boolean printSimulation)
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
 		IList<Int32>? installmentsCounts, IList<Int32>? installmentsDelays,
 		Int32 installmentCount, Int32 installmentDelay,
-		Decimal totalInterest, IList<Decimal> reInstallments, Simulation simulation
+		Decimal totalInterest, IList<Decimal> reInstallments, Simulation simulation,
+		Boolean isTarget
 	)
 	{
 		simulation = simulation.NewMonth();
@@ -53,9 +56,11 @@ public class Simulator(Config config, Boolean printSimulation)
 		simulation.MonthLabel = config.Months[monthIndex];
 		var nextMonthIndex = monthIndex + 1;
 
-		var printStep = monthIndex < 7;
+		isTarget = isTarget
+		    && config.InitialInstallmentsCounts[monthIndex] == installmentCount
+		    && config.InitialInstallmentsDelays[monthIndex] == installmentDelay;
 
-		if (printStep)
+		if (isTarget)
 		{
 			Console.WriteLine($"{new String('-', monthIndex)} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 		}
@@ -123,8 +128,8 @@ public class Simulator(Config config, Boolean printSimulation)
 		{
 			if (installmentsCounts == null && installmentsDelays == null)
 			{
-				if (printStep)
-					Console.WriteLine(" WRONG");
+				if (isTarget)
+					Console.WriteLine("WRONG");
 				return null;
 			}
 
@@ -175,18 +180,11 @@ public class Simulator(Config config, Boolean printSimulation)
 				balancesPt, simulation.NubankNewLimit, simulation.C6Limit,
 				installmentsCounts, installmentsDelays,
 				count, delay,
-				totalInterest, reInstallments, simulation
+				totalInterest, reInstallments, simulation,
+				isTarget
 			),
 			nextMonthIndex, installmentsCounts, installmentsDelays
 		);
-
-		if (printStep)
-		{
-			if (childSimulation == null)
-				Console.WriteLine("WRONG =(");
-			else
-				Console.WriteLine($"RIGHT =) {totalInterest}");
-		}
 
 		return childSimulation;
 	}
