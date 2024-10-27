@@ -13,18 +13,20 @@ public class Field
 		Text = text;
 	}
 
-	public Field(String name, Decimal value)
-		: this(name, $"{value:0.00}")
+	public Field(String name, Decimal number)
+		: this(name)
 	{
-		Value = value;
+		Number = number;
 	}
 
 	public String Name { get; }
-	public String Text { get; }
-	public Decimal Value { get; set; }
+	public Decimal? Number { get; set; }
+	public String? Text { get; set; }
+
+	public String Value => Text ?? $"{Number:0.00}";
 
 	public override String ToString()
 	{
-		return $"{Name}: {Text}";
+		return $"{Name}: {Value}";
 	}
 }

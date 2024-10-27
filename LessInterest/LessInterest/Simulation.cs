@@ -30,6 +30,12 @@ public class Simulation : Report
 		get => getValue();
 	}
 
+	public Decimal NubankNewLimit
+	{
+		set => add(value);
+		get => getValue();
+	}
+
 	public Decimal C6Installments
 	{
 		set => add(value);
@@ -138,7 +144,7 @@ public class Simulation : Report
 		if (field == null)
 			table[position].Add(new Field(name, value));
 		else
-			field.Value = value;
+			field.Number = value;
 	}
 
 	private String getText([CallerMemberName] String name = "")
@@ -148,7 +154,7 @@ public class Simulation : Report
 
 	private Decimal getValue([CallerMemberName] String name = "")
 	{
-		return get(name)?.Value ?? 0;
+		return get(name)?.Number ?? 0;
 	}
 
 	private Field? get([CallerMemberName] String name = "")

@@ -137,7 +137,7 @@ public class Simulator(Config config, Boolean printSimulation)
 		simulation.BalancePTNext = Math.Round(balanceBRNext / config.Currency, 2);
 		balancesPt.Add(simulation.BalancePTNext);
 
-		simulation.NubankLimit -= reInstallmentTotal;
+		simulation.NubankNewLimit = simulation.NubankLimit - reInstallmentTotal;
 
 		var nextReInstallment = nextMonthIndex + installmentDelay;
 		while (reInstallments.Count <= nextReInstallment + installmentCount)
@@ -163,7 +163,7 @@ public class Simulator(Config config, Boolean printSimulation)
 		return oneOrAll(
 			(count, delay) => process(
 				nextMonthIndex,
-				balancesPt, simulation.NubankLimit, simulation.C6Limit,
+				balancesPt, simulation.NubankNewLimit, simulation.C6Limit,
 				installmentsCounts, installmentsDelays,
 				count, delay,
 				totalInterest, reInstallments, simulation
@@ -198,7 +198,7 @@ public class Simulator(Config config, Boolean printSimulation)
 
 				if (simulation == null) continue;
 
-				if (chosen == null || chosen.Total.Value > simulation.Total.Value)
+				if (chosen == null || chosen.Total.Number > simulation.Total.Number)
 				{
 					chosen = simulation;
 				}

@@ -38,7 +38,7 @@ public class SimulationTest
 		{
 			for (var c = 0; c < transposed.GetLength(1); c++)
 			{
-				Assert.That(transposed[r, c].Text, Is.EqualTo(result[r, c]));
+				Assert.That(transposed[r, c].Value, Is.EqualTo(result[r, c]));
 			}
 		}
 	}
@@ -73,7 +73,7 @@ public class SimulationTest
 		{
 			for (var c = 0; c < transposed.GetLength(1); c++)
 			{
-				Assert.That(transposed[r, c].Text, Is.EqualTo(result[r, c]));
+				Assert.That(transposed[r, c].Value, Is.EqualTo(result[r, c]));
 			}
 		}
 	}
