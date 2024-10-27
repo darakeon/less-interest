@@ -2,20 +2,9 @@
 
 public class Report
 {
-	private IList<IList<Field>> table { get; } = new List<IList<Field>>();
+	protected IList<IList<Field>> table { get; } = new List<IList<Field>>();
 	
 	public Field Total { get; set; }
-
-
-	public void Add(Int32 row, Field field)
-	{
-		while (table.Count <= row)
-		{
-			table.Add(new List<Field>());
-		}
-
-		table[row].Add(field);
-	}
 
 	public void Print(Action<String> write)
 	{
@@ -29,7 +18,7 @@ public class Report
 			Console.WriteLine();
 		}
 
-		Console.WriteLine(Total.Value);
+		Console.WriteLine(Total.Text);
 	}
 
 	public Field[,] Transpose()

@@ -18,7 +18,7 @@ public class Simulator(Config config, Boolean printSimulation)
 			balancesPt, nubankLimit, c6Limit,
 			installmentsCounts, installmentsDelays,
 			installmentsCounts[0], installmentsDelays[0],
-			totalInterest, reInstallments, new Report()
+			totalInterest, reInstallments, new Simulation()
 		)!;
 	}
 
@@ -35,7 +35,7 @@ public class Simulator(Config config, Boolean printSimulation)
 				balancesPt, nubankLimit, c6Limit,
 				null, null,
 				count, delay,
-				totalInterest, reInstallments, new Report()
+				totalInterest, reInstallments, new Simulation()
 			)
 		);
 	}
@@ -45,14 +45,16 @@ public class Simulator(Config config, Boolean printSimulation)
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
 		IList<Int32>? installmentsCounts, IList<Int32>? installmentsDelays,
 		Int32 installmentCount, Int32 installmentDelay,
-		Decimal totalInterest, IList<Decimal> reInstallments, Report simulation
+		Decimal totalInterest, IList<Decimal> reInstallments, Simulation simulation
 	)
 	{
-		var monthLabel = config.Months[monthIndex];
+		simulation.NewMonth();
+
+		simulation.MonthLabel = config.Months[monthIndex];
 		var nextMonthIndex = monthIndex + 1;
 
 		var dashes = new String('-', monthIndex);
-		Console.Write($"{dashes} {monthLabel} {installmentCount}x after {installmentDelay} months:");
+		Console.Write($"{dashes} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 
 		if (reInstallments.Count <= monthIndex)
 			reInstallments.Add(0);
@@ -63,62 +65,55 @@ public class Simulator(Config config, Boolean printSimulation)
 		if (config.NubankInstallments.Count <= monthIndex)
 			config.NubankInstallments.Add(0);
 
-		simulation.Add(monthIndex, new Field("month", monthLabel));
+		simulation.NubankInstallments = config.NubankInstallments[monthIndex];
+		simulation.NubankLimit = nubankLimit + config.NubankInstallments[monthIndex];
 
-		simulation.Add(monthIndex, new Field("nubank_installments", config.NubankInstallments[monthIndex]));
-		nubankLimit += config.NubankInstallments[monthIndex];
-		simulation.Add(monthIndex, new Field("nubank_limit", nubankLimit));
+		simulation.C6Installments = config.C6Installments[monthIndex];
+		simulation.C6Limit = c6Limit + config.C6Installments[monthIndex];
 
-		simulation.Add(monthIndex, new Field("c6_installments", config.C6Installments[monthIndex]));
-		c6Limit += config.C6Installments[monthIndex];
-		simulation.Add(monthIndex, new Field("c6_limit", c6Limit));
+		simulation.Limit = simulation.NubankLimit + simulation.C6Limit;
 
-		var limit = nubankLimit + c6Limit;
-		simulation.Add(monthIndex, new Field("limit", limit));
+		simulation.Salary = config.Salary[monthIndex];
+		simulation.SpentPT = config.SpentPT[monthIndex];
 
-		simulation.Add(monthIndex, new Field("salary", config.Salary[monthIndex]));
-		simulation.Add(monthIndex, new Field("spent_pt", config.SpentPT[monthIndex]));
+		simulation.BalancePTInitial = balancesPt[monthIndex];
 
-		var balancePt = balancesPt[monthIndex];
+		simulation.BalancePTFinal = 
+			simulation.BalancePTInitial 
+			+ config.Salary[monthIndex] 
+			- config.SpentPT[monthIndex];
 
-		simulation.Add(monthIndex, new Field("balance_pt", balancePt));
+		simulation.BalancePTBR =
+			simulation.BalancePTFinal * config.Currency;
 
-		balancePt = balancePt + config.Salary[monthIndex] - config.SpentPT[monthIndex];
-		simulation.Add(monthIndex, new Field("balance_pt_left", balancePt));
+		simulation.SalaryBR = 0;
+		simulation.SpentBR = config.SpentBR[monthIndex];
+		simulation.NubankInstallments = config.NubankInstallments[monthIndex];
+		simulation.C6Installments = config.C6Installments[monthIndex];
+		simulation.ReInstallments = reInstallments[monthIndex];
 
-		var balancePtBr = balancePt * config.Currency;
-		simulation.Add(monthIndex, new Field("balance_pt_br", balancePtBr));
-
-		simulation.Add(monthIndex, new Field("salary_br", 0));
-		simulation.Add(monthIndex, new Field("spent_br", config.SpentBR[monthIndex]));
-		simulation.Add(monthIndex, new Field("nubank_installments", config.NubankInstallments[monthIndex]));
-		simulation.Add(monthIndex, new Field("c6_installments", config.C6Installments[monthIndex]));
-		simulation.Add(monthIndex, new Field("reInstallments", reInstallments[monthIndex]));
-
-		var balanceBr =
+		simulation.BalanceBR =
 			config.SpentBR[monthIndex]
 			+ config.NubankInstallments[monthIndex]
 			+ config.C6Installments[monthIndex]
 			+ reInstallments[monthIndex];
 
-		simulation.Add(monthIndex, new Field("balance_br", balanceBr));
-
 		var reInstallment = 0m;
 		var interest = 0m;
 
-		if (balanceBr > balancePtBr)
+		if (simulation.BalanceBR > simulation.BalancePTBR)
 		{
-			reInstallment = balanceBr - balancePtBr;
+			reInstallment = simulation.BalanceBR - simulation.BalancePTBR;
 			interest = config.Interests[installmentCount - 1][installmentDelay];
 		}
 
-		simulation.Add(monthIndex, new Field("re_installment", reInstallment));
+		simulation.ReInstallment = reInstallment;
 
 		var reInstallmentTotal = Math.Ceiling(
 			reInstallment * interest / installmentCount * 100
 		) * installmentCount / 100;
 
-		if (reInstallmentTotal > limit)
+		if (reInstallmentTotal > simulation.Limit)
 		{
 			if (installmentsCounts == null && installmentsDelays == null)
 			{
@@ -126,7 +121,7 @@ public class Simulator(Config config, Boolean printSimulation)
 				return null;
 			}
 
-			reInstallmentTotal = limit;
+			reInstallmentTotal = simulation.Limit;
 			reInstallment = reInstallmentTotal / interest;
 		}
 		Console.WriteLine();
@@ -135,13 +130,14 @@ public class Simulator(Config config, Boolean printSimulation)
 
 		var reInstallmentPart = reInstallmentTotal / installmentCount;
 
-		simulation.Add(monthIndex, new Field("re_installment_total", reInstallmentTotal));
-		simulation.Add(monthIndex, new Field("re_installment_part", reInstallmentPart));
+		simulation.ReInstallmentTotal = reInstallmentTotal;
+		simulation.ReInstallmentPart = reInstallmentPart;
 
-		balancePt = Math.Round((balancePtBr - balanceBr + reInstallment) / config.Currency, 2);
-		balancesPt.Add(balancePt);
+		var balanceBRNext = simulation.BalancePTBR - simulation.BalanceBR + reInstallment;
+		simulation.BalancePTNext = Math.Round(balanceBRNext / config.Currency, 2);
+		balancesPt.Add(simulation.BalancePTNext);
 
-		nubankLimit -= reInstallmentTotal;
+		simulation.NubankLimit -= reInstallmentTotal;
 
 		var nextReInstallment = nextMonthIndex + installmentDelay;
 		while (reInstallments.Count <= nextReInstallment + installmentCount)
@@ -167,7 +163,7 @@ public class Simulator(Config config, Boolean printSimulation)
 		return oneOrAll(
 			(count, delay) => process(
 				nextMonthIndex,
-				balancesPt, nubankLimit, c6Limit,
+				balancesPt, simulation.NubankLimit, simulation.C6Limit,
 				installmentsCounts, installmentsDelays,
 				count, delay,
 				totalInterest, reInstallments, simulation
@@ -202,7 +198,7 @@ public class Simulator(Config config, Boolean printSimulation)
 
 				if (simulation == null) continue;
 
-				if (chosen == null || chosen.Total.Decimal > simulation.Total.Decimal)
+				if (chosen == null || chosen.Total.Value > simulation.Total.Value)
 				{
 					chosen = simulation;
 				}
