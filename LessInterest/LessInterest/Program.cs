@@ -10,12 +10,10 @@ public class Program
 		var nubankLimit = config.NubankLimit;
 		var c6Limit = config.C6Limit;
 
-		var simulator = new Simulator(config, false);
+		var simulator = new Simulator(config, true);
 		var simulation = simulator.ProcessAll(
 			balancesPt, nubankLimit, c6Limit
 		);
-
-		Console.ReadLine();
 
 		if (simulation == null)
 			return;

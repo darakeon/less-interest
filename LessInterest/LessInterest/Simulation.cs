@@ -6,10 +6,26 @@ public class Simulation : Report
 {
 	private Int32 position = -1;
 
-	public void NewMonth()
+	public Simulation() { }
+
+	private Simulation(Simulation original)
 	{
+		foreach (var row in original.table)
+		{
+			table.Add(new List<Field>());
+			foreach (var cell in row)
+			{
+				table.Last().Add(cell);
+			}
+		}
+
 		table.Add(new List<Field>());
-		position++;
+		position = original.position + 1;
+	}
+
+	public Simulation NewMonth()
+	{
+		return new Simulation(this);
 	}
 
 	public String MonthLabel

@@ -48,13 +48,17 @@ public class Simulator(Config config, Boolean printSimulation)
 		Decimal totalInterest, IList<Decimal> reInstallments, Simulation simulation
 	)
 	{
-		simulation.NewMonth();
+		simulation = simulation.NewMonth();
 
 		simulation.MonthLabel = config.Months[monthIndex];
 		var nextMonthIndex = monthIndex + 1;
 
-		var dashes = new String('-', monthIndex);
-		Console.Write($"{dashes} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
+		var printStep = monthIndex < 7;
+
+		if (printStep)
+		{
+			Console.WriteLine($"{new String('-', monthIndex)} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
+		}
 
 		if (reInstallments.Count <= monthIndex)
 			reInstallments.Add(0);
@@ -78,9 +82,9 @@ public class Simulator(Config config, Boolean printSimulation)
 
 		simulation.BalancePTInitial = balancesPt[monthIndex];
 
-		simulation.BalancePTFinal = 
-			simulation.BalancePTInitial 
-			+ config.Salary[monthIndex] 
+		simulation.BalancePTFinal =
+			simulation.BalancePTInitial
+			+ config.Salary[monthIndex]
 			- config.SpentPT[monthIndex];
 
 		simulation.BalancePTBR =
@@ -119,7 +123,8 @@ public class Simulator(Config config, Boolean printSimulation)
 		{
 			if (installmentsCounts == null && installmentsDelays == null)
 			{
-				Console.WriteLine(" WRONG");
+				if (printStep)
+					Console.WriteLine(" WRONG");
 				return null;
 			}
 
@@ -130,7 +135,6 @@ public class Simulator(Config config, Boolean printSimulation)
 		{
 			simulation.ReInstallmentAllowed = simulation.ReInstallmentNeeded;
 		}
-		Console.WriteLine();
 
 		totalInterest += (simulation.ReInstallmentTotal - simulation.ReInstallmentAllowed);
 
@@ -155,15 +159,17 @@ public class Simulator(Config config, Boolean printSimulation)
 
 		simulation.Total = totalInterest;
 
-		if (printSimulation)
+		if (nextMonthIndex == config.Months.Count)
 		{
-			simulation.Print(Console.Write);
+			if (printSimulation)
+			{
+				simulation.Print(Console.Write);
+			}
+
+			return simulation;
 		}
 
-		if (nextMonthIndex == config.Months.Count)
-			return simulation;
-		
-		return oneOrAll(
+		var childSimulation = oneOrAll(
 			(count, delay) => process(
 				nextMonthIndex,
 				balancesPt, simulation.NubankNewLimit, simulation.C6Limit,
@@ -173,6 +179,16 @@ public class Simulator(Config config, Boolean printSimulation)
 			),
 			nextMonthIndex, installmentsCounts, installmentsDelays
 		);
+
+		if (printStep)
+		{
+			if (childSimulation == null)
+				Console.WriteLine("WRONG =(");
+			else
+				Console.WriteLine($"RIGHT =) {totalInterest}");
+		}
+
+		return childSimulation;
 	}
 
 	private Simulation? oneOrAll(
