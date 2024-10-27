@@ -12,13 +12,13 @@ public class Report
 		{
 			foreach (var cell in row)
 			{
-				Console.WriteLine(cell);
+				write(cell.ToString());
 			}
 
-			Console.WriteLine();
+			write("");
 		}
 
-		Console.WriteLine(total.Text);
+		write(total.Value ?? "");
 	}
 
 	public Field[,] Transpose()
