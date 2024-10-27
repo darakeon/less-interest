@@ -4,7 +4,7 @@ public class Program
 {
 	public static void Main(String[] args)
 	{
-		var config = Config.Init();
+		var config = Config.Init("config_1");
 
 		var balancesPt = config.BalancesPT;
 		var nubankLimit = config.NubankLimit;

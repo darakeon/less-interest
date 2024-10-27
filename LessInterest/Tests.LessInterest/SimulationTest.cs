@@ -6,18 +6,14 @@ namespace Tests.LessInterest;
 public class SimulationTest
 {
 	[SetUp]
-	public void Setup()
-	{			
-		config = Config.Init();
-		simulator = new Simulator(config, false);
-	}
-
-	public Config config { get; set; }
-	public Simulator simulator { get; set; }
+	public void Setup() { }
 
 	[Test]
 	public void InitialSimulation()
 	{
+		var config = Config.Init("config_1");
+		var simulator = new Simulator(config, false);
+
 		var balancesPt = config.BalancesPT;
 		var nubankLimit = config.NubankLimit;
 		var c6Limit = config.C6Limit;

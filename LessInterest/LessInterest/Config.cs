@@ -4,9 +4,9 @@ namespace LessInterest;
 
 public class Config
 {
-	public static Config Init()
+	public static Config Init(String filename)
 	{
-		var configPath = Path.Combine("configs", "config.json");
+		var configPath = Path.Combine("configs", $"{filename}.json");
 
 		var configJson =
 			File.ReadAllText(configPath)
