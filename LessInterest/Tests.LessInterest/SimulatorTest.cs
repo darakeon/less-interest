@@ -20,10 +20,12 @@ public class SimulatorTest
 		var installmentsCounts = config.InitialInstallmentsCounts;
 		var installmentsDelays = config.InitialInstallmentsDelays;
 
-		var simulation = simulator.Process(
+		var task = simulator.Process(
 			balancesPt, nubankLimit, c6Limit,
 			installmentsCounts, installmentsDelays
 		);
+		task.Wait();
+		var simulation = task.Result;
 
 		var transposed = simulation.Transpose();
 
@@ -55,10 +57,12 @@ public class SimulatorTest
 		var installmentsCounts = config.InitialInstallmentsCounts;
 		var installmentsDelays = config.InitialInstallmentsDelays;
 
-		var simulation = simulator.Process(
+		var task = simulator.Process(
 			balancesPt, nubankLimit, c6Limit,
 			installmentsCounts, installmentsDelays
 		);
+		task.Wait();
+		var simulation = task.Result;
 
 		var transposed = simulation.Transpose();
 

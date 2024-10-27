@@ -8,26 +8,26 @@ public class Simulator(
 	private Config config = config;
 	private Action<String> write = (text) => write?.Invoke(text);
 
-	public Report Process(
+	public async Task<Simulation> Process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
 		IList<Int32> installmentsCounts, IList<Int32> installmentsDelays
 	)
 	{
-		return process(balancesPt, nubankLimit, c6Limit, false, false)!;
+		return (await process(balancesPt, nubankLimit, c6Limit, false, false))!;
 	}
 
-	public Simulation? ProcessAll(
+	public async Task<Simulation?> ProcessAll(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit
 	)
 	{
-		return oneOrAll(
-			(count, delay) => process(
+		return await oneOrAll(
+			async (count, delay) => await process(
 				balancesPt, nubankLimit, c6Limit, true, true, count, delay
 			)
 		);
 	}
 
-	private Simulation? process(
+	private async Task<Simulation?>  process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
 		Boolean stopOutOfLimit, Boolean isMulti,
 		Int32? chosenInstallmentCount = null, Int32? chosenInstallmentDelay = null,
@@ -42,8 +42,13 @@ public class Simulator(
 		var monthIndex = simulation.MonthIndex;
 		var nextMonthIndex = monthIndex + 1;
 
-		var installmentCount = chosenInstallmentCount ?? config.InitialInstallmentsCounts[monthIndex];
-		var installmentDelay = chosenInstallmentDelay ?? config.InitialInstallmentsDelays[monthIndex];
+		var installmentCount =
+			chosenInstallmentCount
+			?? config.InitialInstallmentsCounts[monthIndex];
+
+		var installmentDelay =
+			chosenInstallmentDelay
+			?? config.InitialInstallmentsDelays[monthIndex];
 
 		reInstallments = reInstallments == null
 			? new List<Decimal>()
@@ -55,7 +60,7 @@ public class Simulator(
 		    && config.InitialInstallmentsCounts[monthIndex] == installmentCount
 		    && config.InitialInstallmentsDelays[monthIndex] == installmentDelay;
 
-		if (isTarget)
+		if (isTarget || monthIndex < 3)
 		{
 			write($"{new String('-', monthIndex + 1)} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 		}
@@ -112,7 +117,6 @@ public class Simulator(
 		else
 		{
 			simulation.ReInstallmentNeeded = 0;
-			
 		}
 
 		simulation.ReInstallmentTotal = Math.Ceiling(
@@ -165,7 +169,7 @@ public class Simulator(
 			return simulation;
 		}
 
-		var childSimulation = oneOrAll(
+		return await oneOrAll(
 			(count, delay) => process(
 				balancesPt, simulation.NubankNewLimit, simulation.C6Limit,
 				stopOutOfLimit, isMulti,
@@ -174,36 +178,36 @@ public class Simulator(
 				simulation, isTarget
 			), isMulti
 		);
-
-		return childSimulation;
 	}
 
-	private Simulation? oneOrAll(
-		Func<Int32?, Int32?, Simulation?> execute, Boolean isMulti = true
+	private async Task<Simulation?> oneOrAll(
+		Func<Int32?, Int32?, Task<Simulation?>> execute, Boolean isMulti = true
 	)
 	{
 		if (!isMulti)
 		{
-			return execute(null, null);
+			return await execute(null, null);
 		}
 
-		Simulation? chosen = null;
+		var simulations = new List<Task<Simulation?>>();
 
 		for (var delay = 0; delay <= 2; delay++)
 		{
 			for (var count = 1; count <= 12; count++)
 			{
 				var simulation = execute(count, delay);
-
-				if (simulation == null) continue;
-
-				if (chosen == null || chosen.Total > simulation.Total)
-				{
-					chosen = simulation;
-				}
+				simulations.Add(simulation);
 			}
 		}
 
-		return chosen;
+		Task.WaitAll(simulations.ToArray());
+
+		return simulations.Select(
+			t => t.Result
+		).Where(
+			s => s != null
+		).OrderBy(
+			s => s.Total
+		).FirstOrDefault();
 	}
 }
