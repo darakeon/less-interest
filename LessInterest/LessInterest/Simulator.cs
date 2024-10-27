@@ -8,28 +8,31 @@ public class Simulator(
 	private Config config = config;
 	private Action<String> write = (text) => write?.Invoke(text);
 
+	private static readonly String multiWrongPath = Path.Combine("..", "..", "..", "logs", "wrong.log");
+	private static IList<String> multiWrong = getWrongs();
+
 	public async Task<Simulation> Process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
 		IList<Int32> installmentsCounts, IList<Int32> installmentsDelays
 	)
 	{
-		return (await process(balancesPt, nubankLimit, c6Limit, false, false))!;
+		return (await process(balancesPt, nubankLimit, c6Limit))!;
 	}
 
 	public async Task<Simulation?> ProcessAll(
-		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit
+		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String multiKey
 	)
 	{
 		return await oneOrAll(
 			async (count, delay) => await process(
-				balancesPt, nubankLimit, c6Limit, true, true, count, delay
-			)
+				balancesPt, nubankLimit, c6Limit, multiKey, count, delay
+			),
+			multiKey
 		);
 	}
 
-	private async Task<Simulation?>  process(
-		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
-		Boolean stopOutOfLimit, Boolean isMulti,
+	private async Task<Simulation?> process(
+		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String? multiKey = null,
 		Int32? chosenInstallmentCount = null, Int32? chosenInstallmentDelay = null,
 		Decimal totalInterest = 0, IList<Decimal>? reInstallments = null,
 		Simulation? simulation = null, Boolean isTarget = true
@@ -49,6 +52,16 @@ public class Simulator(
 		var installmentDelay =
 			chosenInstallmentDelay
 			?? config.InitialInstallmentsDelays[monthIndex];
+
+		if (multiKey != null)
+		{
+			multiKey += $"_{monthIndex}x{installmentCount}+{installmentDelay}";
+
+			if (multiWrong.Contains(multiKey))
+			{
+				return null;
+			}
+		}
 
 		reInstallments = reInstallments == null
 			? new List<Decimal>()
@@ -125,10 +138,13 @@ public class Simulator(
 
 		if (simulation.ReInstallmentTotal > simulation.Limit)
 		{
-			if (stopOutOfLimit)
+			if (multiKey != null)
 			{
 				if (isTarget)
 					write("WRONG");
+				
+				await setWrong(multiKey);
+
 				return null;
 			}
 
@@ -171,43 +187,61 @@ public class Simulator(
 
 		return await oneOrAll(
 			(count, delay) => process(
-				balancesPt, simulation.NubankNewLimit, simulation.C6Limit,
-				stopOutOfLimit, isMulti,
+				balancesPt, simulation.NubankNewLimit, simulation.C6Limit, multiKey,
 				count, delay,
 				totalInterest, reInstallments,
 				simulation, isTarget
-			), isMulti
+			), multiKey
 		);
 	}
 
 	private async Task<Simulation?> oneOrAll(
-		Func<Int32?, Int32?, Task<Simulation?>> execute, Boolean isMulti = true
+		Func<Int32?, Int32?, Task<Simulation?>> execute, String? multiKey
 	)
 	{
-		if (!isMulti)
+		if (multiKey == null)
 		{
 			return await execute(null, null);
 		}
 
-		var simulations = new List<Task<Simulation?>>();
+		var simulations = new Task<Simulation?>[3*12];
 
 		for (var delay = 0; delay <= 2; delay++)
 		{
 			for (var count = 1; count <= 12; count++)
 			{
 				var simulation = execute(count, delay);
-				simulations.Add(simulation);
+
+				var index = delay * 12 + count - 1;
+				simulations[index] = simulation;
 			}
 		}
 
-		Task.WaitAll(simulations.ToArray());
+		Task.WaitAll(simulations);
 
-		return simulations.Select(
+		var lowestSimulation = simulations.Select(
 			t => t.Result
 		).Where(
 			s => s != null
 		).OrderBy(
 			s => s.Total
 		).FirstOrDefault();
+
+		if (lowestSimulation == null)
+			await setWrong(multiKey);
+
+		return lowestSimulation;
+	}
+
+	private static async Task setWrong(String multiKey)
+	{
+		await File.AppendAllLinesAsync(multiWrongPath, new[] { multiKey });
+	}
+
+	private static IList<String> getWrongs()
+	{
+		return File.Exists(multiWrongPath) 
+			? File.ReadAllLines(multiWrongPath) 
+			: Array.Empty<String>();
 	}
 }
