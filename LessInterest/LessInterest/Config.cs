@@ -17,7 +17,8 @@ public class Config
 
 	public Decimal Currency { get; set; }
 		
-	public IList<Decimal> BalancesPT { get; set; }
+	public Decimal BalancePT { get; set; }
+	public Decimal BalanceBR { get; set; }
 		
 	public IList<String> Months { get; set; }
 		
@@ -36,4 +37,12 @@ public class Config
 
 	public IList<Int32> InitialInstallmentsCounts { get; set; }
 	public IList<Int32> InitialInstallmentsDelays { get; set; }
+
+	public IList<Decimal> GenerateBalancesPT()
+	{
+		return new List<Decimal>()
+		{
+			Math.Round(BalanceBR / Currency + BalancePT, 2)
+		};
+	}
 }

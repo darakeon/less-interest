@@ -6,7 +6,7 @@ public class Program
 	{
 		var config = Config.Init("config_1");
 
-		var balancesPt = config.BalancesPT;
+		var balancesPt = config.GenerateBalancesPT();
 		var nubankLimit = config.NubankLimit;
 		var c6Limit = config.C6Limit;
 
