@@ -1,9 +1,12 @@
 namespace LessInterest;
 
-public class Simulator(Config config, Boolean printSimulation)
+public class Simulator(
+	Config config,
+	Action<String>? write = null
+)
 {
 	private Config config = config;
-	private Boolean printSimulation = printSimulation;
+	private Action<String> write = (text) => write?.Invoke(text);
 
 	public Report Process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
@@ -166,11 +169,7 @@ public class Simulator(Config config, Boolean printSimulation)
 
 		if (nextMonthIndex == config.Months.Count)
 		{
-			if (printSimulation)
-			{
-				simulation.Print(Console.Write);
-			}
-
+			simulation.Print(write);
 			return simulation;
 		}
 

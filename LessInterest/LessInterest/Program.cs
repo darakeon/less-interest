@@ -10,25 +10,7 @@ public class Program
 		var nubankLimit = config.NubankLimit;
 		var c6Limit = config.C6Limit;
 
-		var simulator = new Simulator(config, true);
-		var simulation = simulator.ProcessAll(
-			balancesPt, nubankLimit, c6Limit
-		);
-
-		if (simulation == null)
-			return;
-			
-		var transposed = simulation.Transpose();
-
-		for (var r = 0; r < transposed.GetLength(0); r++)
-		{
-			for (var c = 0; c < transposed.GetLength(1); c++)
-			{
-				Console.Write($"{transposed[r, c].Text} ");
-			}
-			Console.WriteLine();
-		}
-
-		Console.WriteLine(simulation.Total);
+		var simulator = new Simulator(config, Console.WriteLine);
+		simulator.ProcessAll(balancesPt, nubankLimit, c6Limit);
 	}
 }

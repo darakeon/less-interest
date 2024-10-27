@@ -12,7 +12,7 @@ public class SimulatorTest
 	public void InitialSimulation()
 	{
 		var config = Config.Init("config_1");
-		var simulator = new Simulator(config, false);
+		var simulator = new Simulator(config);
 
 		var balancesPt = config.GenerateBalancesPT();
 		var nubankLimit = config.NubankLimit;
@@ -47,7 +47,7 @@ public class SimulatorTest
 	public void Simulation20241027()
 	{
 		var config = Config.Init("config_2");
-		var simulator = new Simulator(config, false);
+		var simulator = new Simulator(config);
 
 		var balancesPt = config.GenerateBalancesPT();
 		var nubankLimit = config.NubankLimit;
