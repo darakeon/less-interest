@@ -22,7 +22,7 @@ public class Simulator(Config config, Boolean printSimulation)
 		)!;
 	}
 
-	public Report? ProcessAll(
+	public Simulation? ProcessAll(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit
 	)
 	{
@@ -40,7 +40,7 @@ public class Simulator(Config config, Boolean printSimulation)
 		);
 	}
 
-	private Report? process(
+	private Simulation? process(
 		Int32 monthIndex,
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
 		IList<Int32>? installmentsCounts, IList<Int32>? installmentsDelays,
@@ -175,8 +175,8 @@ public class Simulator(Config config, Boolean printSimulation)
 		);
 	}
 
-	private Report? oneOrAll(
-		Func<Int32, Int32, Report?> execute,
+	private Simulation? oneOrAll(
+		Func<Int32, Int32, Simulation?> execute,
 		Int32? index = null, IList<Int32>? counts = null, IList<Int32>? delays = null
 	)
 	{
@@ -191,17 +191,17 @@ public class Simulator(Config config, Boolean printSimulation)
 			return execute(counts[index.Value], delays[index.Value]);
 		}
 
-		Report? chosen = null;
+		Simulation? chosen = null;
 
 		for (var delay = 0; delay <= 2; delay++)
 		{
 			for (var count = 1; count <= 12; count++)
 			{
-				var simulation = execute(count, delay);;
+				var simulation = execute(count, delay);
 
 				if (simulation == null) continue;
 
-				if (chosen == null || chosen.Total.Number > simulation.Total.Number)
+				if (chosen == null || chosen.Total > simulation.Total)
 				{
 					chosen = simulation;
 				}
