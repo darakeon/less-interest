@@ -4,7 +4,7 @@ public class Report
 {
 	protected IList<IList<Field>> table { get; } = new List<IList<Field>>();
 	
-	public Field Total { get; set; }
+	protected Field total { get; set; }
 
 	public void Print(Action<String> write)
 	{
@@ -18,7 +18,7 @@ public class Report
 			Console.WriteLine();
 		}
 
-		Console.WriteLine(Total.Text);
+		Console.WriteLine(total.Text);
 	}
 
 	public Field[,] Transpose()

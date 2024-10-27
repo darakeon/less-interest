@@ -114,7 +114,13 @@ public class Simulation : Report
 		get => getValue();
 	}
 
-	public Decimal ReInstallment
+	public Decimal ReInstallmentNeeded
+	{
+		set => add(value);
+		get => getValue();
+	}
+
+	public Decimal ReInstallmentAllowed
 	{
 		set => add(value);
 		get => getValue();
@@ -130,6 +136,12 @@ public class Simulation : Report
 	{
 		set => add(value);
 		get => getValue();
+	}
+
+	public Decimal Total
+	{
+		set => total = create(value);
+		get => total.Number ?? 0;
 	}
 
 	private void add(String value, [CallerMemberName] String name = "")
@@ -160,5 +172,10 @@ public class Simulation : Report
 	private Field? get([CallerMemberName] String name = "")
 	{
 		return table[position].FirstOrDefault(f => f.Name == name);
+	}
+
+	private Field create(Decimal value, [CallerMemberName] String name = "")
+	{
+		return new Field(name, value);
 	}
 }
