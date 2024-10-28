@@ -16,12 +16,12 @@ public class Config
 	}
 
 	public Decimal Currency { get; set; }
-		
+
 	public Decimal BalancePT { get; set; }
 	public Decimal BalanceBR { get; set; }
-		
+
 	public IList<String> Months { get; set; }
-		
+
 	public IList<Decimal> Salary { get; set; }
 
 	public IList<Decimal> SpentPT { get; set; }

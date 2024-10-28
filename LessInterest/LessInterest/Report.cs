@@ -3,7 +3,7 @@
 public class Report
 {
 	protected IList<IList<Field>> table { get; } = new List<IList<Field>>();
-	
+
 	protected Field total { get; set; }
 
 	public void Print(Action<String> write)

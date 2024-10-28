@@ -142,7 +142,7 @@ public class Simulator(
 			{
 				if (isTarget)
 					write("WRONG");
-				
+
 				await setWrong(multiKey);
 
 				return null;
