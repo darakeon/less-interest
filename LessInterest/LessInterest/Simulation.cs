@@ -2,7 +2,7 @@
 
 namespace LessInterest;
 
-public class Simulation : Report
+public class Simulation : Report, ISimulation
 {
 	public Simulation()
 	{
@@ -25,7 +25,7 @@ public class Simulation : Report
 		MonthIndex = original.MonthIndex + 1;
 	}
 
-	public Simulation NewMonth()
+	public ISimulation NewMonth()
 	{
 		return new Simulation(this);
 	}

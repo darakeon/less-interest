@@ -13,7 +13,7 @@ public class Simulator(
 	private static readonly String multiWrongPath = Path.Combine("..", "..", "..", "logs", "wrong.log");
 	private static ISet<String> multiWrong = getWrongs();
 
-	public async Task<Simulation> Process(
+	public async Task<ISimulation> Process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
 		IList<Int32> installmentsCounts, IList<Int32> installmentsDelays
 	)
@@ -21,7 +21,7 @@ public class Simulator(
 		return (await process(balancesPt, nubankLimit, c6Limit))!;
 	}
 
-	public async Task<Simulation?> ProcessAll(
+	public async Task<ISimulation?> ProcessAll(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String multiKey
 	)
 	{
@@ -33,11 +33,11 @@ public class Simulator(
 		);
 	}
 
-	private async Task<Simulation?> process(
+	private async Task<ISimulation?> process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String? multiKey = null,
 		Int32? chosenInstallmentCount = null, Int32? chosenInstallmentDelay = null,
 		Decimal totalInterest = 0, IList<Decimal>? reInstallments = null,
-		Simulation? simulation = null, Boolean isTarget = true
+		ISimulation? simulation = null, Boolean isTarget = true
 	)
 	{
 		simulation = simulation == null
@@ -195,8 +195,8 @@ public class Simulator(
 		);
 	}
 
-	private async Task<Simulation?> oneOrAll(
-		Func<Int32?, Int32?, Task<Simulation?>> execute, String? multiKey
+	private async Task<ISimulation?> oneOrAll(
+		Func<Int32?, Int32?, Task<ISimulation?>> execute, String? multiKey
 	)
 	{
 		if (multiKey == null)
@@ -204,7 +204,7 @@ public class Simulator(
 			return await execute(null, null);
 		}
 
-		var simulations = new Task<Simulation?>[3*12];
+		var simulations = new Task<ISimulation?>[3*12];
 
 		for (var delay = 0; delay <= 2; delay++)
 		{
