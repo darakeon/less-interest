@@ -15,35 +15,35 @@ public class Config
 		return JsonConvert.DeserializeObject<Config>(configJson)!;
 	}
 
-	public Decimal Currency { get; set; }
+	public Single Currency { get; set; }
 
-	public Decimal BalancePT { get; set; }
-	public Decimal BalanceBR { get; set; }
-	public Decimal Tolerance { get; set; }
+	public Single BalancePT { get; set; }
+	public Single BalanceBR { get; set; }
+	public Single Tolerance { get; set; }
 
 	public IList<String> Months { get; set; }
 
-	public IList<Decimal> Salary { get; set; }
+	public IList<Single> Salary { get; set; }
 
-	public IList<Decimal> SpentPT { get; set; }
-	public IList<Decimal> SpentBR { get; set; }
+	public IList<Single> SpentPT { get; set; }
+	public IList<Single> SpentBR { get; set; }
 
-	public Decimal NubankLimit { get; set; }
-	public IList<Decimal> NubankInstallments { get; set; }
+	public Single NubankLimit { get; set; }
+	public IList<Single> NubankInstallments { get; set; }
 
-	public Decimal C6Limit { get; set; }
-	public IList<Decimal> C6Installments { get; set; }
+	public Single C6Limit { get; set; }
+	public IList<Single> C6Installments { get; set; }
 
-	public IList<IList<Decimal>> Interests { get; set; }
+	public IList<IList<Single>> Interests { get; set; }
 
-	public IList<Int32> InitialInstallmentsCounts { get; set; }
-	public IList<Int32> InitialInstallmentsDelays { get; set; }
+	public IList<Int16> InitialInstallmentsCounts { get; set; }
+	public IList<Int16> InitialInstallmentsDelays { get; set; }
 
-	public IList<Decimal> GenerateBalancesPT()
+	public IList<Single> GenerateBalancesPT()
 	{
-		return new List<Decimal>()
+		return new List<Single>
 		{
-			Math.Round(BalanceBR / Currency + BalancePT, 2)
+			(Single)Math.Round(BalanceBR / Currency + BalancePT, 2)
 		};
 	}
 }

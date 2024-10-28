@@ -14,15 +14,15 @@ public class Simulator(
 	private static ISet<String> multiWrong = getWrongs();
 
 	public async Task<ISimulation> Process(
-		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
-		IList<Int32> installmentsCounts, IList<Int32> installmentsDelays
+		IList<Single> balancesPt, Single nubankLimit, Single c6Limit,
+		IList<Int16> installmentsCounts, IList<Int16> installmentsDelays
 	)
 	{
 		return (await process(balancesPt, nubankLimit, c6Limit));
 	}
 
 	public async Task<ISimulation> ProcessAll(
-		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String multiKey
+		IList<Single> balancesPt, Single nubankLimit, Single c6Limit, String multiKey
 	)
 	{
 		return await oneOrAll(
@@ -35,9 +35,9 @@ public class Simulator(
 	}
 
 	private async Task<ISimulation> process(
-		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String? multiKey = null,
-		Int32? chosenInstallmentCount = null, Int32? chosenInstallmentDelay = null,
-		Decimal totalInterest = 0, IList<Decimal>? reInstallments = null,
+		IList<Single> balancesPt, Single nubankLimit, Single c6Limit, String? multiKey = null,
+		Int16? chosenInstallmentCount = null, Int16? chosenInstallmentDelay = null,
+		Single totalInterest = 0, IList<Single>? reInstallments = null,
 		ISimulation? simulation = null, Boolean isTarget = true
 	)
 	{
@@ -46,7 +46,7 @@ public class Simulator(
 			: simulation.NewMonth();
 
 		var monthIndex = simulation.MonthIndex;
-		var nextMonthIndex = monthIndex + 1;
+		var nextMonthIndex = (Int16)(monthIndex + 1);
 
 		var installmentCount =
 			chosenInstallmentCount
@@ -68,7 +68,7 @@ public class Simulator(
 		}
 
 		reInstallments = reInstallments == null
-			? new List<Decimal>()
+			? new List<Single>()
 			: reInstallments.ToList();
 
 		simulation.MonthLabel = config.Months[monthIndex];
@@ -122,7 +122,7 @@ public class Simulator(
 			+ config.C6Installments[monthIndex]
 			+ reInstallments[monthIndex];
 
-		var interest = 0m;
+		var interest = 0f;
 
 		if (simulation.BalanceBR > simulation.BalancePTBR)
 		{
@@ -134,7 +134,7 @@ public class Simulator(
 			simulation.ReInstallmentNeeded = 0;
 		}
 
-		simulation.ReInstallmentTotal = Math.Ceiling(
+		simulation.ReInstallmentTotal = (Single)Math.Ceiling(
 			simulation.ReInstallmentNeeded * interest / installmentCount * 100
 		) * installmentCount / 100;
 
@@ -164,7 +164,7 @@ public class Simulator(
 		simulation.ReInstallmentPart = simulation.ReInstallmentTotal / installmentCount;
 
 		var balanceBRNext = simulation.BalancePTBR - simulation.BalanceBR + simulation.ReInstallmentAllowed;
-		simulation.BalancePTNext = Math.Round(balanceBRNext / config.Currency, 2);
+		simulation.BalancePTNext = (Single)Math.Round(balanceBRNext / config.Currency, 2);
 		balancesPt.Add(simulation.BalancePTNext);
 
 		simulation.NubankNewLimit = simulation.NubankLimit - simulation.ReInstallmentTotal;
@@ -199,8 +199,8 @@ public class Simulator(
 	}
 
 	private async Task<ISimulation> oneOrAll(
-		Func<Int32?, Int32?, Task<ISimulation>> execute,
-		Int32 monthIndex, String? multiKey
+		Func<Int16?, Int16?, Task<ISimulation>> execute,
+		Int16 monthIndex, String? multiKey
 	)
 	{
 		if (multiKey == null)
@@ -217,9 +217,9 @@ public class Simulator(
 
 		var simulationTasks = new List<Task<ISimulation>>();
 
-		for (var delay = 0; delay <= 2; delay++)
+		for (Int16 delay = 0; delay <= 2; delay++)
 		{
-			for (var count = 1; count <= 12; count++)
+			for (Int16 count = 1; count <= 12; count++)
 			{
 				var index = delay * 12 + count - 1;
 

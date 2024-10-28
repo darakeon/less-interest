@@ -22,7 +22,7 @@ public class Simulation : Report, ISimulation
 		}
 
 		table.Add(new List<Field>());
-		MonthIndex = original.MonthIndex + 1;
+		MonthIndex = (Int16)(original.MonthIndex + 1);
 	}
 
 	public ISimulation NewMonth()
@@ -30,7 +30,7 @@ public class Simulation : Report, ISimulation
 		return new Simulation(this);
 	}
 
-	public Int32 MonthIndex { get; }
+	public Int16 MonthIndex { get; }
 
 	public String MonthLabel
 	{
@@ -38,122 +38,122 @@ public class Simulation : Report, ISimulation
 		get => getText();
 	}
 
-	public Decimal NubankInstallments
+	public Single NubankInstallments
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal NubankLimit
+	public Single NubankLimit
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal NubankNewLimit
+	public Single NubankNewLimit
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal C6Installments
+	public Single C6Installments
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal C6Limit
+	public Single C6Limit
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal Limit
+	public Single Limit
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal Salary
+	public Single Salary
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal SpentPT
+	public Single SpentPT
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal BalancePTInitial
+	public Single BalancePTInitial
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal BalancePTFinal
+	public Single BalancePTFinal
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal BalancePTNext
+	public Single BalancePTNext
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal BalancePTBR
+	public Single BalancePTBR
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal SalaryBR
+	public Single SalaryBR
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal SpentBR
+	public Single SpentBR
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal ReInstallments
+	public Single ReInstallments
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal BalanceBR
+	public Single BalanceBR
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	private Int32 reInstallmentNeededField;
-	public Decimal ReInstallmentNeeded
+	private Int16 reInstallmentNeededField;
+	public Single ReInstallmentNeeded
 	{
 		set { reInstallmentNeededField = add(value); }
 		get => getValue();
 	}
 
-	public Decimal ReInstallmentAllowed
+	public Single ReInstallmentAllowed
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal ReInstallmentTotal
+	public Single ReInstallmentTotal
 	{
 		set => add(value);
 		get => getValue();
 	}
 
-	public Decimal ReInstallmentPart
+	public Single ReInstallmentPart
 	{
 		set => add(value);
 		get => getValue();
@@ -161,13 +161,13 @@ public class Simulation : Report, ISimulation
 
 	public Boolean Valid { set; get; }
 
-	public Decimal Total
+	public Single Total
 	{
 		set => total = create(value);
 		get => total.Number ?? 0;
 	}
 
-	public Boolean NeedReInstallment(Int32 index)
+	public Boolean NeedReInstallment(Int16 index)
 	{
 		return table[index][reInstallmentNeededField].Number > 0;
 	}
@@ -177,7 +177,7 @@ public class Simulation : Report, ISimulation
 		table[MonthIndex].Add(new Field(name, value));
 	}
 
-	private Int32 add(Decimal value, Int32 index = 0, [CallerMemberName] String name = "")
+	private Int16 add(Single value, Int16 index = 0, [CallerMemberName] String name = "")
 	{
 		var field = get(name);
 
@@ -191,7 +191,7 @@ public class Simulation : Report, ISimulation
 			field.Number = value;
 		}
 
-		return table[MonthIndex].IndexOf(field);
+		return (Int16)table[MonthIndex].IndexOf(field);
 	}
 
 	private String getText([CallerMemberName] String name = "")
@@ -199,7 +199,7 @@ public class Simulation : Report, ISimulation
 		return get(name)?.Text ?? "";
 	}
 
-	private Decimal getValue([CallerMemberName] String name = "")
+	private Single getValue([CallerMemberName] String name = "")
 	{
 		return get(name)?.Number ?? 0;
 	}
@@ -209,7 +209,7 @@ public class Simulation : Report, ISimulation
 		return table[MonthIndex].FirstOrDefault(f => f.Name == name);
 	}
 
-	private Field create(Decimal value, [CallerMemberName] String name = "")
+	private Field create(Single value, [CallerMemberName] String name = "")
 	{
 		return new Field(name, value);
 	}

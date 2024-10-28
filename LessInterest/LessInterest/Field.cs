@@ -13,14 +13,14 @@ public class Field
 		Text = text;
 	}
 
-	public Field(String name, Decimal number)
+	public Field(String name, Single number)
 		: this(name)
 	{
 		Number = number;
 	}
 
 	public String Name { get; }
-	public Decimal? Number { get; set; }
+	public Single? Number { get; set; }
 	public String? Text { get; set; }
 
 	public String Value => Text ?? $"{Number:0.00}";

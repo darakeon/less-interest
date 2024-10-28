@@ -3,38 +3,38 @@
 public interface ISimulation
 {
 	ISimulation NewMonth();
-	Int32 MonthIndex { get; }
+	Int16 MonthIndex { get; }
 	String MonthLabel { set; get; }
-	Decimal NubankInstallments { set; get; }
-	Decimal NubankLimit { set; get; }
-	Decimal NubankNewLimit { set; get; }
-	Decimal C6Installments { set; get; }
-	Decimal C6Limit { set; get; }
-	Decimal Limit { set; get; }
-	Decimal Salary { set; get; }
-	Decimal SpentPT { set; get; }
-	Decimal BalancePTInitial { set; get; }
-	Decimal BalancePTFinal { set; get; }
-	Decimal BalancePTNext { set; get; }
-	Decimal BalancePTBR { set; get; }
-	Decimal SalaryBR { set; get; }
-	Decimal SpentBR { set; get; }
-	Decimal ReInstallments { set; get; }
-	Decimal BalanceBR { set; get; }
-	Decimal ReInstallmentNeeded { set; get; }
-	Decimal ReInstallmentAllowed { set; get; }
-	Decimal ReInstallmentTotal { set; get; }
-	Decimal ReInstallmentPart { set; get; }
+	Single NubankInstallments { set; get; }
+	Single NubankLimit { set; get; }
+	Single NubankNewLimit { set; get; }
+	Single C6Installments { set; get; }
+	Single C6Limit { set; get; }
+	Single Limit { set; get; }
+	Single Salary { set; get; }
+	Single SpentPT { set; get; }
+	Single BalancePTInitial { set; get; }
+	Single BalancePTFinal { set; get; }
+	Single BalancePTNext { set; get; }
+	Single BalancePTBR { set; get; }
+	Single SalaryBR { set; get; }
+	Single SpentBR { set; get; }
+	Single ReInstallments { set; get; }
+	Single BalanceBR { set; get; }
+	Single ReInstallmentNeeded { set; get; }
+	Single ReInstallmentAllowed { set; get; }
+	Single ReInstallmentTotal { set; get; }
+	Single ReInstallmentPart { set; get; }
 
 	Boolean Valid { get; set; }
 
-	Decimal Total { set; get; }
+	Single Total { set; get; }
 
-	Boolean NeedReInstallment(Int32 index);
+	Boolean NeedReInstallment(Int16 index);
 
 	void Print(Action<String> write);
 
 	Field[,] Transpose();
 
-	Field this[Int32 row, Int32 column] { get; }
+	Field this[Int16 row, Int16 column] { get; }
 }

@@ -9,9 +9,9 @@ class SimpleSimulation : ISimulation
 		list = new[]{this};
 	}
 
-	private SimpleSimulation(IEnumerable<SimpleSimulation> list, Int32 parentMonthIndex)
+	private SimpleSimulation(IEnumerable<SimpleSimulation> list, Int16 parentMonthIndex)
 	{
-		MonthIndex = parentMonthIndex + 1;
+		MonthIndex = (Int16)(parentMonthIndex + 1);
 
 		this.list = list
 			.Take(MonthIndex)
@@ -26,39 +26,39 @@ class SimpleSimulation : ISimulation
 
 	private SimpleSimulation[] list { get; }
 
-	public Int32 MonthIndex { get; }
+	public Int16 MonthIndex { get; }
 	public String MonthLabel { get; set; } = "";
 
-	public Decimal NubankInstallments { get; set; }
-	public Decimal NubankLimit { get; set; }
-	public Decimal C6Installments { get; set; }
-	public Decimal C6Limit { get; set; }
-	public Decimal Limit { get; set; }
-	public Decimal Salary { get; set; }
-	public Decimal SpentPT { get; set; }
-	public Decimal BalancePTInitial { get; set; }
-	public Decimal BalancePTFinal { get; set; }
-	public Decimal BalancePTBR { get; set; }
-	public Decimal SalaryBR { get; set; }
-	public Decimal SpentBR { get; set; }
-	public Decimal ReInstallments { get; set; }
-	public Decimal BalanceBR { get; set; }
-	public Decimal ReInstallmentNeeded { get; set; }
-	public Decimal ReInstallmentTotal { get; set; }
-	public Decimal ReInstallmentAllowed { get; set; }
-	public Decimal ReInstallmentPart { get; set; }
-	public Decimal BalancePTNext { get; set; }
-	public Decimal NubankNewLimit { get; set; }
+	public Single NubankInstallments { get; set; }
+	public Single NubankLimit { get; set; }
+	public Single C6Installments { get; set; }
+	public Single C6Limit { get; set; }
+	public Single Limit { get; set; }
+	public Single Salary { get; set; }
+	public Single SpentPT { get; set; }
+	public Single BalancePTInitial { get; set; }
+	public Single BalancePTFinal { get; set; }
+	public Single BalancePTBR { get; set; }
+	public Single SalaryBR { get; set; }
+	public Single SpentBR { get; set; }
+	public Single ReInstallments { get; set; }
+	public Single BalanceBR { get; set; }
+	public Single ReInstallmentNeeded { get; set; }
+	public Single ReInstallmentTotal { get; set; }
+	public Single ReInstallmentAllowed { get; set; }
+	public Single ReInstallmentPart { get; set; }
+	public Single BalancePTNext { get; set; }
+	public Single NubankNewLimit { get; set; }
 
 	public Boolean Valid { set; get; }
-	public Decimal Total { get; set; }
+	public Single Total { get; set; }
 
 	private static IDictionary<PropertyInfo, Func<Object, String>> exportable =>
 		typeof(SimpleSimulation)
 			.GetProperties()
 			.Where(
 				p => (
-					p.PropertyType == typeof(Decimal)
+					p.PropertyType == typeof(Single)
 					|| p.PropertyType == typeof(String)
 				) && p.Name != nameof(Total)
 			)
@@ -69,15 +69,15 @@ class SimpleSimulation : ISimulation
 
 	private static Func<Object, String> toString(PropertyInfo prop)
 	{
-		if (prop.PropertyType == typeof(Decimal))
-			return (Object obj) => ((Decimal)prop.GetValue(obj)).ToString("0.00");
+		if (prop.PropertyType == typeof(Single))
+			return (Object obj) => ((Single)prop.GetValue(obj)).ToString("0.00");
 
 		return (Object obj) => (String)prop.GetValue(obj);
 	}
 
-	private static readonly Int32 height = exportable.Count;
+	private static readonly Int16 height = (Int16)exportable.Count;
 
-	public Boolean NeedReInstallment(Int32 index)
+	public Boolean NeedReInstallment(Int16 index)
 	{
 		return !Valid || list[index].ReInstallmentNeeded > 0;
 	}
@@ -97,12 +97,12 @@ class SimpleSimulation : ISimulation
 
 	public Field[,] Transpose()
 	{
-		var width = list.Length;
+		var width = (Int16)list.Length;
 		var transposed = new Field[height, width];
 
-		for (var r = 0; r < width; r++)
+		for (Int16 r = 0; r < width; r++)
 		{
-			for (var c = 0; c < height; c++)
+			for (Int16 c = 0; c < height; c++)
 			{
 				transposed[c, r] = this[r, c];
 			}
@@ -111,7 +111,7 @@ class SimpleSimulation : ISimulation
 		return transposed;
 	}
 
-	public Field this[Int32 row, Int32 column]
+	public Field this[Int16 row, Int16 column]
 	{
 		get
 		{
