@@ -18,10 +18,10 @@ public class Simulator(
 		IList<Int32> installmentsCounts, IList<Int32> installmentsDelays
 	)
 	{
-		return (await process(balancesPt, nubankLimit, c6Limit))!;
+		return (await process(balancesPt, nubankLimit, c6Limit));
 	}
 
-	public async Task<ISimulation?> ProcessAll(
+	public async Task<ISimulation> ProcessAll(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String multiKey
 	)
 	{
@@ -29,11 +29,12 @@ public class Simulator(
 			async (count, delay) => await process(
 				balancesPt, nubankLimit, c6Limit, multiKey, count, delay
 			),
+			0,
 			multiKey
 		);
 	}
 
-	private async Task<ISimulation?> process(
+	private async Task<ISimulation> process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit, String? multiKey = null,
 		Int32? chosenInstallmentCount = null, Int32? chosenInstallmentDelay = null,
 		Decimal totalInterest = 0, IList<Decimal>? reInstallments = null,
@@ -61,7 +62,8 @@ public class Simulator(
 
 			if (multiWrong.Contains(multiKey))
 			{
-				return null;
+				simulation.Valid = false;
+				return simulation;
 			}
 		}
 
@@ -77,7 +79,7 @@ public class Simulator(
 
 		if (isTarget || monthIndex < 4)
 		{
-			write($"{new String('-', monthIndex + 1)} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
+			write($"{new String('-', monthIndex + 1)} {DateTime.Now:HH:mm:ss:fff} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 		}
 
 		if (reInstallments.Count <= monthIndex)
@@ -143,9 +145,10 @@ public class Simulator(
 				if (isTarget)
 					write("WRONG");
 
-				await setWrong(multiKey);
+				setWrong(multiKey);
 
-				return null;
+				simulation.Valid = false;
+				return simulation;
 			}
 
 			simulation.ReInstallmentTotal = simulation.Limit;
@@ -191,12 +194,12 @@ public class Simulator(
 				count, delay,
 				totalInterest, reInstallments,
 				simulation, isTarget
-			), multiKey
+			), monthIndex, multiKey
 		);
 	}
 
-	private async Task<ISimulation?> oneOrAll(
-		Func<Int32?, Int32?, Task<ISimulation?>> execute, String? multiKey
+	private async Task<ISimulation> oneOrAll(
+		Func<Int32?, Int32?, Task<ISimulation>> execute, Int32 monthIndex, String? multiKey
 	)
 	{
 		if (multiKey == null)
@@ -204,48 +207,64 @@ public class Simulator(
 			return await execute(null, null);
 		}
 
-		var simulations = new Task<ISimulation?>[3*12];
+		var firstSimulationTask = execute(1, 0);
+
+		var firstSimulation = await firstSimulationTask;
+
+		if (!firstSimulation.NeedReInstallment(monthIndex))
+			return firstSimulation;
+
+		var simulationTasks = new List<Task<ISimulation>>();
 
 		for (var delay = 0; delay <= 2; delay++)
 		{
 			for (var count = 1; count <= 12; count++)
 			{
-				var simulation = execute(count, delay);
-
 				var index = delay * 12 + count - 1;
-				simulations[index] = simulation;
+
+				if (index == 0)
+					continue;
+
+				var simulationTask = execute(count, delay);
+
+				simulationTasks.Add(simulationTask);
 			}
 		}
 
-		Task.WaitAll(simulations);
+		var simulations = new List<ISimulation>
+		{
+			firstSimulation
+		};
 
-		var lowestSimulation = simulations.Select(
-			t => t.Result
-		).Where(
-			s => s != null
-		).OrderBy(
-			s => s.Total
-		).FirstOrDefault();
+		foreach (var simulationTask in simulationTasks)
+		{
+			simulations.Add(await simulationTask);
+		}
+
+		var lowestSimulation =
+			simulations
+				.Where(s => s.Valid)
+				.MinBy(s => s.Total);
 
 		if (lowestSimulation == null)
-			await setWrong(multiKey);
+			setWrong(multiKey);
 
-		return lowestSimulation;
+		return lowestSimulation ?? firstSimulation;
 	}
 
 	private static Int32 wrongKeysCount;
-	private static async Task setWrong(String multiKey)
+	private static void setWrong(String multiKey)
 	{
-		await File.AppendAllLinesAsync(multiWrongPath, new[] { multiKey });
-		wrongKeysCount++;
-
-		if (wrongKeysCount > 100000)
+		lock (multiKey)
 		{
-			lock (multiKey)
-			{
-				getWrongs();
-				wrongKeysCount = 0;
-			}
+			File.AppendAllLines(multiWrongPath, new[] { multiKey });
+			wrongKeysCount++;
+
+			if (wrongKeysCount <= 100000)
+				return;
+
+			getWrongs();
+			wrongKeysCount = 0;
 		}
 	}
 

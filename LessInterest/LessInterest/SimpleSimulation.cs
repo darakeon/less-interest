@@ -50,6 +50,7 @@ class SimpleSimulation : ISimulation
 	public Decimal BalancePTNext { get; set; }
 	public Decimal NubankNewLimit { get; set; }
 
+	public Boolean Valid { set; get; }
 	public Decimal Total { get; set; }
 
 	private static IDictionary<PropertyInfo, Func<Object, String>> exportable {
@@ -88,6 +89,11 @@ class SimpleSimulation : ISimulation
 	}
 
 	private static readonly Int32 height = exportable.Count;
+
+	public Boolean NeedReInstallment(Int32 index)
+	{
+		return list[index].ReInstallmentNeeded > 0;
+	}
 
 	public void Print(Action<String> write)
 	{

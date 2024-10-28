@@ -12,6 +12,9 @@ public class Program
 		var c6Limit = config.C6Limit;
 
 		var simulator = new Simulator(config, Console.WriteLine);
-		simulator.ProcessAll(balancesPt, nubankLimit, c6Limit, configFile);
+
+		var task = simulator.ProcessAll(balancesPt, nubankLimit, c6Limit, configFile);
+
+		task.Wait();
 	}
 }

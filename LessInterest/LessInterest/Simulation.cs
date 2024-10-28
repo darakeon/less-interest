@@ -134,9 +134,10 @@ public class Simulation : Report, ISimulation
 		get => getValue();
 	}
 
+	private Int32 reInstallmentNeededField;
 	public Decimal ReInstallmentNeeded
 	{
-		set => add(value);
+		set { reInstallmentNeededField = add(value); }
 		get => getValue();
 	}
 
@@ -158,10 +159,17 @@ public class Simulation : Report, ISimulation
 		get => getValue();
 	}
 
+	public Boolean Valid { set; get; }
+
 	public Decimal Total
 	{
 		set => total = create(value);
 		get => total.Number ?? 0;
+	}
+
+	public Boolean NeedReInstallment(Int32 index)
+	{
+		return table[index][reInstallmentNeededField].Number > 0;
 	}
 
 	private void add(String value, [CallerMemberName] String name = "")
@@ -169,14 +177,21 @@ public class Simulation : Report, ISimulation
 		table[MonthIndex].Add(new Field(name, value));
 	}
 
-	private void add(Decimal value, [CallerMemberName] String name = "")
+	private Int32 add(Decimal value, Int32 index = 0, [CallerMemberName] String name = "")
 	{
 		var field = get(name);
 
 		if (field == null)
-			table[MonthIndex].Add(new Field(name, value));
+		{
+			field = new Field(name, value);
+			table[MonthIndex].Add(field);
+		}
 		else
+		{
 			field.Number = value;
+		}
+
+		return table[MonthIndex].IndexOf(field);
 	}
 
 	private String getText([CallerMemberName] String name = "")

@@ -25,8 +25,16 @@ public interface ISimulation
 	Decimal ReInstallmentAllowed { set; get; }
 	Decimal ReInstallmentTotal { set; get; }
 	Decimal ReInstallmentPart { set; get; }
+
+	Boolean Valid { get; set; }
+
 	Decimal Total { set; get; }
+
+	Boolean NeedReInstallment(Int32 index);
+
 	void Print(Action<String> write);
+
 	Field[,] Transpose();
+
 	Field this[Int32 row, Int32 column] { get; }
 }
