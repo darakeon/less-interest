@@ -6,14 +6,14 @@ class SimpleSimulation : ISimulation
 {
 	public SimpleSimulation()
 	{
-		list = new[]{this};
+		simulations = new[]{this};
 	}
 
-	private SimpleSimulation(IEnumerable<SimpleSimulation> list, Int16 parentMonthIndex)
+	private SimpleSimulation(SimpleSimulation[] parentSimulations, Int16 parentMonthIndex)
 	{
 		MonthIndex = (Int16)(parentMonthIndex + 1);
 
-		this.list = list
+		simulations = parentSimulations
 			.Take(MonthIndex)
 			.Append(this)
 			.ToArray();
@@ -21,10 +21,10 @@ class SimpleSimulation : ISimulation
 
 	public ISimulation NewMonth()
 	{
-		return new SimpleSimulation(list, MonthIndex);
+		return new SimpleSimulation(simulations, MonthIndex);
 	}
 
-	private SimpleSimulation[] list { get; }
+	private SimpleSimulation[] simulations { get; }
 
 	public Int16 MonthIndex { get; }
 	public String MonthLabel { get; set; } = "";
@@ -79,12 +79,12 @@ class SimpleSimulation : ISimulation
 
 	public Boolean NeedReInstallment(Int16 index)
 	{
-		return !Valid || list[index].ReInstallmentNeeded > 0;
+		return !Valid || simulations[index].ReInstallmentNeeded > 0;
 	}
 
 	public void Print(Action<String> write)
 	{
-		foreach (var simulation in list)
+		foreach (var simulation in simulations)
 		{
 			foreach (var prop in exportable)
 			{
@@ -97,7 +97,7 @@ class SimpleSimulation : ISimulation
 
 	public Field[,] Transpose()
 	{
-		var width = (Int16)list.Length;
+		var width = (Int16)simulations.Length;
 		var transposed = new Field[height, width];
 
 		for (Int16 r = 0; r < width; r++)
@@ -115,9 +115,9 @@ class SimpleSimulation : ISimulation
 	{
 		get
 		{
-			var prop = exportable.Keys.ToList()[column];
+			var prop = exportable.Keys.ToArray()[column];
 			var value = exportable[prop];
-			return new Field(prop.Name, value(list[row]));
+			return new Field(prop.Name, value(simulations[row]));
 		}
 	}
 }

@@ -14,15 +14,15 @@ public class Simulator(
 	private static ISet<String> multiWrong = getWrongs();
 
 	public async Task<ISimulation> Process(
-		IList<Single> balancesPt, Single nubankLimit, Single c6Limit,
-		IList<Int16> installmentsCounts, IList<Int16> installmentsDelays
+		Single[] balancesPt, Single nubankLimit, Single c6Limit,
+		Int16[] installmentsCounts, Int16[] installmentsDelays
 	)
 	{
-		return (await process(balancesPt, nubankLimit, c6Limit));
+		return await process(balancesPt, nubankLimit, c6Limit);
 	}
 
 	public async Task<ISimulation> ProcessAll(
-		IList<Single> balancesPt, Single nubankLimit, Single c6Limit, String multiKey
+		Single[] balancesPt, Single nubankLimit, Single c6Limit, String multiKey
 	)
 	{
 		return await oneOrAll(
@@ -35,9 +35,9 @@ public class Simulator(
 	}
 
 	private async Task<ISimulation> process(
-		IList<Single> balancesPt, Single nubankLimit, Single c6Limit, String? multiKey = null,
+		Single[] balancesPt, Single nubankLimit, Single c6Limit, String? multiKey = null,
 		Int16? chosenInstallmentCount = null, Int16? chosenInstallmentDelay = null,
-		Single totalInterest = 0, IList<Single>? reInstallments = null,
+		Single totalInterest = 0, Single[]? reInstallments = null,
 		ISimulation? simulation = null, Boolean isTarget = true
 	)
 	{
@@ -68,8 +68,8 @@ public class Simulator(
 		}
 
 		reInstallments = reInstallments == null
-			? new List<Single>()
-			: reInstallments.ToList();
+			? new Single[config.Months.Length + 12 + 2]
+			: reInstallments.ToArray();
 
 		simulation.MonthLabel = config.Months[monthIndex];
 
@@ -82,20 +82,19 @@ public class Simulator(
 			write($"{new String('-', monthIndex + 1)} {DateTime.Now:HH:mm:ss:fff} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 		}
 
-		if (reInstallments.Count <= monthIndex)
-			reInstallments.Add(0);
+		simulation.NubankInstallments =
+			monthIndex < config.NubankInstallments.Length
+				? config.NubankInstallments[monthIndex]
+				: 0;
 
-		if (config.NubankInstallments.Count <= monthIndex)
-			config.NubankInstallments.Add(0);
+		simulation.NubankLimit = nubankLimit + simulation.NubankInstallments;
 
-		if (config.C6Installments.Count <= monthIndex)
-			config.C6Installments.Add(0);
+		simulation.C6Installments =
+			monthIndex < config.C6Installments.Length
+				? config.C6Installments[monthIndex]
+				: 0;
 
-		simulation.NubankInstallments = config.NubankInstallments[monthIndex];
-		simulation.NubankLimit = nubankLimit + config.NubankInstallments[monthIndex];
-
-		simulation.C6Installments = config.C6Installments[monthIndex];
-		simulation.C6Limit = c6Limit + config.C6Installments[monthIndex];
+		simulation.C6Limit = c6Limit + simulation.C6Installments;
 
 		simulation.Limit = simulation.NubankLimit + simulation.C6Limit;
 
@@ -118,8 +117,8 @@ public class Simulator(
 
 		simulation.BalanceBR =
 			config.SpentBR[monthIndex]
-			+ config.NubankInstallments[monthIndex]
-			+ config.C6Installments[monthIndex]
+			+ simulation.NubankInstallments
+			+ simulation.C6Installments
 			+ reInstallments[monthIndex];
 
 		var interest = 0f;
@@ -127,7 +126,7 @@ public class Simulator(
 		if (simulation.BalanceBR > simulation.BalancePTBR)
 		{
 			simulation.ReInstallmentNeeded = simulation.BalanceBR - simulation.BalancePTBR;
-			interest = config.Interests[installmentCount - 1][installmentDelay];
+			interest = config.Interests[installmentCount - 1, installmentDelay];
 		}
 		else
 		{
@@ -165,15 +164,11 @@ public class Simulator(
 
 		var balanceBRNext = simulation.BalancePTBR - simulation.BalanceBR + simulation.ReInstallmentAllowed;
 		simulation.BalancePTNext = (Single)Math.Round(balanceBRNext / config.Currency, 2);
-		balancesPt.Add(simulation.BalancePTNext);
+		balancesPt[monthIndex+1] = simulation.BalancePTNext;
 
 		simulation.NubankNewLimit = simulation.NubankLimit - simulation.ReInstallmentTotal;
 
 		var nextReInstallment = nextMonthIndex + installmentDelay;
-		while (reInstallments.Count <= nextReInstallment + installmentCount)
-		{
-			reInstallments.Add(0);
-		}
 
 		for (var i = 0; i < installmentCount; i++)
 		{
@@ -182,7 +177,7 @@ public class Simulator(
 
 		simulation.Total = totalInterest;
 
-		if (nextMonthIndex == config.Months.Count)
+		if (nextMonthIndex == config.Months.Length)
 		{
 			simulation.Print(write);
 			return simulation;
