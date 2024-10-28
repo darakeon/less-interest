@@ -215,31 +215,28 @@ public class Simulator(
 		if (!firstSimulation.NeedReInstallment(monthIndex))
 			return firstSimulation;
 
-		var simulationTasks = new List<Task<ISimulation>>();
+		var simulationTasks = new Task<ISimulation>[35];
 
 		for (Int16 delay = 0; delay <= 2; delay++)
 		{
 			for (Int16 count = 1; count <= 12; count++)
 			{
-				var index = delay * 12 + count - 1;
+				var index = delay * 12 + count - 2;
 
-				if (index == 0)
+				if (index < 0)
 					continue;
 
-				var simulationTask = execute(count, delay);
-
-				simulationTasks.Add(simulationTask);
+				simulationTasks[index] = execute(count, delay);
 			}
 		}
 
-		var simulations = new List<ISimulation>
-		{
-			firstSimulation
-		};
+		var simulations = new ISimulation[simulationTasks.Length+1];
+		simulations[0] = firstSimulation;
 
-		foreach (var simulationTask in simulationTasks)
+		// ReSharper disable once ForCanBeConvertedToForeach because faster
+		for (var st = 0; st < simulationTasks.Length; st++)
 		{
-			simulations.Add(await simulationTask);
+			simulations[st+1] = await simulationTasks[st];
 		}
 
 		var lowestSimulation =
@@ -279,13 +276,16 @@ public class Simulator(
 
 			var nonRepeated = new SortedSet<String>();
 
-			foreach (var line in lines)
+			// ReSharper disable once ForCanBeConvertedToForeach because faster
+			for (var l = 0; l < lines.Count; l++)
 			{
+				var line = lines[l];
+
 				var parts = line.Split("_");
 				var check = parts[0];
 				var add = true;
 
-				foreach (var part in parts.Skip(1))
+				for (var p = 1; p < parts.Length; p++)
 				{
 					if (nonRepeated.Contains(check))
 					{
@@ -293,7 +293,7 @@ public class Simulator(
 						break;
 					}
 
-					check += "_" + part;
+					check += "_" + parts[p];
 				}
 
 				if (add)
