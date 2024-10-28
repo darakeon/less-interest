@@ -264,7 +264,7 @@ public class Simulator(
 			if (wrongKeysCount <= 100000)
 				return;
 
-			getWrongs();
+			multiWrong = getWrongs();
 			wrongKeysCount = 0;
 		}
 	}
