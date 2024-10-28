@@ -233,9 +233,20 @@ public class Simulator(
 		return lowestSimulation;
 	}
 
+	private static Int32 wrongKeysCount;
 	private static async Task setWrong(String multiKey)
 	{
 		await File.AppendAllLinesAsync(multiWrongPath, new[] { multiKey });
+		wrongKeysCount++;
+
+		if (wrongKeysCount > 100000)
+		{
+			lock (multiKey)
+			{
+				getWrongs();
+				wrongKeysCount = 0;
+			}
+		}
 	}
 
 	private static ISet<String> getWrongs()
