@@ -23,11 +23,13 @@ public class Report
 
 	public Field[,] Transpose()
 	{
-		var transposed = new Field[Height, Width];
+		var width = table.Count;
+		var height = table.Max(s => s.Count);
+		var transposed = new Field[height, width];
 
-		for (var r = 0; r < Width; r++)
+		for (var r = 0; r < width; r++)
 		{
-			for (var c = 0; c < Height; c++)
+			for (var c = 0; c < height; c++)
 			{
 				transposed[c, r] = this[r, c];
 			}
@@ -35,9 +37,6 @@ public class Report
 
 		return transposed;
 	}
-
-	public Int32 Width => table.Count;
-	public Int32 Height => table.Max(s => s.Count);
 
 	public Field this[Int32 row, Int32 column] => table[row][column];
 }
