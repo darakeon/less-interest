@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace LessInterest;
 
 public class Simulator(
@@ -9,7 +11,7 @@ public class Simulator(
 	private Action<String> write = (text) => write?.Invoke(text);
 
 	private static readonly String multiWrongPath = Path.Combine("..", "..", "..", "logs", "wrong.log");
-	private static IList<String> multiWrong = getWrongs();
+	private static ISet<String> multiWrong = getWrongs();
 
 	public async Task<Simulation> Process(
 		IList<Decimal> balancesPt, Decimal nubankLimit, Decimal c6Limit,
@@ -236,10 +238,41 @@ public class Simulator(
 		await File.AppendAllLinesAsync(multiWrongPath, new[] { multiKey });
 	}
 
-	private static IList<String> getWrongs()
+	private static ISet<String> getWrongs()
 	{
-		return File.Exists(multiWrongPath) 
-			? File.ReadAllLines(multiWrongPath) 
-			: Array.Empty<String>();
+		if (File.Exists(multiWrongPath))
+		{
+			var lines = File.ReadAllLines(multiWrongPath)
+				.OrderBy(l => l)
+				.ToImmutableSortedSet();
+
+			var nonRepeated = new SortedSet<String>();
+
+			foreach (var line in lines)
+			{
+				var parts = line.Split("_");
+				var check = parts[0] + "_" + parts[1];
+				var add = true;
+				foreach (var part in parts.Skip(2))
+				{
+					if (nonRepeated.Contains(check))
+					{
+						add = false;
+						break;
+					}
+					check += "_" + part;
+				}
+
+				if (add)
+					nonRepeated.Add(line);
+			}
+
+			if (lines.Count > nonRepeated.Count)
+				File.WriteAllLines(multiWrongPath, nonRepeated);
+
+			return nonRepeated;
+		}
+
+		return new SortedSet<String>();
 	}
 }
