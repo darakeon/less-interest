@@ -6,25 +6,25 @@ class SimpleSimulation : ISimulation
 {
 	public SimpleSimulation()
 	{
-		list = new List<SimpleSimulation>();
-		list.Add(this);
+		list = new[]{this};
 	}
 
-	private SimpleSimulation(IList<SimpleSimulation> list, Int32 parentMonthIndex)
+	private SimpleSimulation(IEnumerable<SimpleSimulation> list, Int32 parentMonthIndex)
 	{
-		list.Add(this);
-		this.list = list;
-
 		MonthIndex = parentMonthIndex + 1;
+
+		this.list = list
+			.Take(MonthIndex)
+			.Append(this)
+			.ToArray();
 	}
 
 	public ISimulation NewMonth()
 	{
-		var ascendingList = list.Take(MonthIndex+1).ToList();
-		return new SimpleSimulation(ascendingList, MonthIndex);
+		return new SimpleSimulation(list, MonthIndex);
 	}
 
-	private IList<SimpleSimulation> list { get; }
+	private SimpleSimulation[] list { get; }
 
 	public Int32 MonthIndex { get; }
 	public String MonthLabel { get; set; } = "";
@@ -97,7 +97,7 @@ class SimpleSimulation : ISimulation
 
 	public Field[,] Transpose()
 	{
-		var width = list.Count;
+		var width = list.Length;
 		var transposed = new Field[height, width];
 
 		for (var r = 0; r < width; r++)
