@@ -136,7 +136,7 @@ public class Simulator(
 			simulation.ReInstallmentNeeded * interest / installmentCount * 100
 		) * installmentCount / 100;
 
-		if (simulation.ReInstallmentTotal > simulation.Limit)
+		if (simulation.ReInstallmentTotal > simulation.Limit + config.Tolerance)
 		{
 			if (multiKey != null)
 			{

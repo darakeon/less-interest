@@ -19,6 +19,7 @@ public class Config
 
 	public Decimal BalancePT { get; set; }
 	public Decimal BalanceBR { get; set; }
+	public Decimal Tolerance { get; set; }
 
 	public IList<String> Months { get; set; }
 
