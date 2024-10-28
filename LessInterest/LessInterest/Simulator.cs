@@ -194,12 +194,13 @@ public class Simulator(
 				count, delay,
 				totalInterest, reInstallments,
 				simulation, isTarget
-			), monthIndex, multiKey
+			), nextMonthIndex, multiKey
 		);
 	}
 
 	private async Task<ISimulation> oneOrAll(
-		Func<Int32?, Int32?, Task<ISimulation>> execute, Int32 monthIndex, String? multiKey
+		Func<Int32?, Int32?, Task<ISimulation>> execute,
+		Int32 monthIndex, String? multiKey
 	)
 	{
 		if (multiKey == null)

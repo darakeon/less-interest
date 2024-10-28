@@ -79,7 +79,7 @@ class SimpleSimulation : ISimulation
 
 	public Boolean NeedReInstallment(Int32 index)
 	{
-		return list[index].ReInstallmentNeeded > 0;
+		return !Valid || list[index].ReInstallmentNeeded > 0;
 	}
 
 	public void Print(Action<String> write)
