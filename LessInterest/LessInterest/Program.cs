@@ -13,8 +13,9 @@ public class Program
 
 		var simulator = new Simulator(config, Console.WriteLine);
 
-		var task = simulator.ProcessAll(balancesPt, nubankLimit, c6Limit, configFile);
+		var multiKey = configFile.Replace("_", "");
 
+		var task = simulator.ProcessAll(balancesPt, nubankLimit, c6Limit, multiKey);
 		task.Wait();
 	}
 }

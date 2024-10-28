@@ -282,15 +282,17 @@ public class Simulator(
 			foreach (var line in lines)
 			{
 				var parts = line.Split("_");
-				var check = parts[0] + "_" + parts[1];
+				var check = parts[0];
 				var add = true;
-				foreach (var part in parts.Skip(2))
+
+				foreach (var part in parts.Skip(1))
 				{
 					if (nonRepeated.Contains(check))
 					{
 						add = false;
 						break;
 					}
+
 					check += "_" + part;
 				}
 
