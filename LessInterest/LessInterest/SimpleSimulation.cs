@@ -53,32 +53,19 @@ class SimpleSimulation : ISimulation
 	public Boolean Valid { set; get; }
 	public Decimal Total { get; set; }
 
-	private static IDictionary<PropertyInfo, Func<Object, String>> exportable {
-		get
-		{
-			try
-			{
-				return typeof(SimpleSimulation)
-					.GetProperties()
-					.Where(
-						p => (
-							p.PropertyType == typeof(Decimal)
-							|| p.PropertyType == typeof(String)
-						) && p.Name != nameof(Total)
-					)
-					.ToDictionary(
-						p => p,
-						toString
-					);
-
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				throw;
-			}
-		}
-	}
+	private static IDictionary<PropertyInfo, Func<Object, String>> exportable =>
+		typeof(SimpleSimulation)
+			.GetProperties()
+			.Where(
+				p => (
+					p.PropertyType == typeof(Decimal)
+					|| p.PropertyType == typeof(String)
+				) && p.Name != nameof(Total)
+			)
+			.ToDictionary(
+				p => p,
+				toString
+			);
 
 	private static Func<Object, String> toString(PropertyInfo prop)
 	{
