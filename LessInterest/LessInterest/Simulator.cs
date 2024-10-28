@@ -41,7 +41,7 @@ public class Simulator(
 	)
 	{
 		simulation = simulation == null
-			? new Simulation()
+			? new SimpleSimulation()
 			: simulation.NewMonth();
 
 		var monthIndex = simulation.MonthIndex;
