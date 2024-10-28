@@ -75,7 +75,7 @@ public class Simulator(
 		    && config.InitialInstallmentsCounts[monthIndex] == installmentCount
 		    && config.InitialInstallmentsDelays[monthIndex] == installmentDelay;
 
-		if (isTarget || monthIndex < 3)
+		if (isTarget || monthIndex < 4)
 		{
 			write($"{new String('-', monthIndex + 1)} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 		}
