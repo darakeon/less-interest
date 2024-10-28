@@ -110,8 +110,6 @@ public class Simulator(
 
 		simulation.SalaryBR = 0;
 		simulation.SpentBR = config.SpentBR[monthIndex];
-		simulation.NubankInstallments = config.NubankInstallments[monthIndex];
-		simulation.C6Installments = config.C6Installments[monthIndex];
 		simulation.ReInstallments = reInstallments[monthIndex];
 
 		simulation.BalanceBR =
