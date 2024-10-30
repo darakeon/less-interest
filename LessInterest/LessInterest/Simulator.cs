@@ -11,6 +11,7 @@ public class Simulator(
 	private Action<String> write = (text) => write?.Invoke(text);
 
 	private static readonly String multiWrongPath = Path.Combine("..", "..", "..", "logs", "wrong.log");
+	private static Int32 wrongKeysCount;
 	private static ISet<String> multiWrong = getWrongs();
 
 	public async Task<ISimulation> Process(
@@ -240,12 +241,11 @@ public class Simulator(
 		return lowestSimulation ?? firstSimulation;
 	}
 
-	private static Int32 wrongKeysCount;
 	private static void setWrong(String multiKey)
 	{
-		lock (multiKey)
+		lock (multiWrongPath)
 		{
-			File.AppendAllLines(multiWrongPath, new[] { multiKey });
+			File.AppendAllText(multiWrongPath, $"\n{multiKey}");
 			wrongKeysCount++;
 
 			if (wrongKeysCount <= 100000)
