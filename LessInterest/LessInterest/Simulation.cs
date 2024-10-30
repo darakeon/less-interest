@@ -38,12 +38,6 @@ public class Simulation : Report, ISimulation
 		get => getText();
 	}
 
-	public Single NubankInstallments
-	{
-		set => add(value);
-		get => getValue();
-	}
-
 	public Single NubankLimit
 	{
 		set => add(value);
@@ -56,12 +50,6 @@ public class Simulation : Report, ISimulation
 		get => getValue();
 	}
 
-	public Single C6Installments
-	{
-		set => add(value);
-		get => getValue();
-	}
-
 	public Single C6Limit
 	{
 		set => add(value);
@@ -69,18 +57,6 @@ public class Simulation : Report, ISimulation
 	}
 
 	public Single Limit
-	{
-		set => add(value);
-		get => getValue();
-	}
-
-	public Single Salary
-	{
-		set => add(value);
-		get => getValue();
-	}
-
-	public Single SpentPT
 	{
 		set => add(value);
 		get => getValue();
@@ -105,18 +81,6 @@ public class Simulation : Report, ISimulation
 	}
 
 	public Single BalancePTBR
-	{
-		set => add(value);
-		get => getValue();
-	}
-
-	public Single SalaryBR
-	{
-		set => add(value);
-		get => getValue();
-	}
-
-	public Single SpentBR
 	{
 		set => add(value);
 		get => getValue();

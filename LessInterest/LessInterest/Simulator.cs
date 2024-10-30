@@ -82,24 +82,21 @@ public class Simulator(
 			write($"{new String('-', monthIndex + 1)} {DateTime.Now:HH:mm:ss:fff} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
 		}
 
-		simulation.NubankInstallments =
+		var nubankInstallments =
 			monthIndex < config.NubankInstallments.Length
 				? config.NubankInstallments[monthIndex]
 				: 0;
 
-		simulation.NubankLimit = nubankLimit + simulation.NubankInstallments;
+		simulation.NubankLimit = nubankLimit + nubankInstallments;
 
-		simulation.C6Installments =
+		var c6Installments =
 			monthIndex < config.C6Installments.Length
 				? config.C6Installments[monthIndex]
 				: 0;
 
-		simulation.C6Limit = c6Limit + simulation.C6Installments;
+		simulation.C6Limit = c6Limit + c6Installments;
 
 		simulation.Limit = simulation.NubankLimit + simulation.C6Limit;
-
-		simulation.Salary = config.Salary[monthIndex];
-		simulation.SpentPT = config.SpentPT[monthIndex];
 
 		simulation.BalancePTInitial = balancesPt[monthIndex];
 
@@ -111,14 +108,12 @@ public class Simulator(
 		simulation.BalancePTBR =
 			simulation.BalancePTFinal * config.Currency;
 
-		simulation.SalaryBR = 0;
-		simulation.SpentBR = config.SpentBR[monthIndex];
 		simulation.ReInstallments = reInstallments[monthIndex];
 
 		simulation.BalanceBR =
 			config.SpentBR[monthIndex]
-			+ simulation.NubankInstallments
-			+ simulation.C6Installments
+			+ nubankInstallments
+			+ c6Installments
 			+ reInstallments[monthIndex];
 
 		var interest = 0f;

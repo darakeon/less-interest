@@ -29,18 +29,12 @@ class SimpleSimulation : ISimulation
 	public Int16 MonthIndex { get; }
 	public String MonthLabel { get; set; } = "";
 
-	public Single NubankInstallments { get; set; }
 	public Single NubankLimit { get; set; }
-	public Single C6Installments { get; set; }
 	public Single C6Limit { get; set; }
 	public Single Limit { get; set; }
-	public Single Salary { get; set; }
-	public Single SpentPT { get; set; }
 	public Single BalancePTInitial { get; set; }
 	public Single BalancePTFinal { get; set; }
 	public Single BalancePTBR { get; set; }
-	public Single SalaryBR { get; set; }
-	public Single SpentBR { get; set; }
 	public Single ReInstallments { get; set; }
 	public Single BalanceBR { get; set; }
 	public Single ReInstallmentNeeded { get; set; }
