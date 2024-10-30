@@ -58,7 +58,7 @@ public class Simulator(
 
 		if (multiKey != null)
 		{
-			multiKey += $"_{monthIndex}x{installmentCount}+{installmentDelay}";
+			multiKey += $"_{monthIndex}x{installmentCount:00}+{installmentDelay}";
 
 			if (multiWrong.Contains(multiKey))
 			{
@@ -79,7 +79,7 @@ public class Simulator(
 
 		if (isTarget || monthIndex < 5)
 		{
-			write($"{new String('-', monthIndex + 1)} {DateTime.Now:HH:mm:ss:fff} {simulation.MonthLabel} {installmentCount}x after {installmentDelay} months:");
+			write($"{new String('-', monthIndex + 1)} {DateTime.Now:HH:mm:ss:fff} {simulation.MonthLabel} {installmentCount:00}x after {installmentDelay} months:");
 		}
 
 		var nubankInstallments =
