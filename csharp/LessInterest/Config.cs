@@ -23,10 +23,14 @@ public class Config
 
 	public String[] Months { get; set; }
 
-	public Single[] Salary { get; set; }
+	public Single[] SalaryPT { get; set; }
+	public Single[]? SalaryBR { get; set; }
 
 	public Single[] SpentPT { get; set; }
 	public Single[] SpentBR { get; set; }
+
+	public Int32[]? InstallmentCountLimits { get; set; }
+	public Int32[]? InstallmentDelayLimits { get; set; }
 
 	public Single NubankLimit { get; set; }
 	public Single[] NubankInstallments { get; set; }

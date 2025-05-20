@@ -26,6 +26,18 @@ public class SimulatorTest
 		testConfigAndResult(3);
 	}
 
+	[Test]
+	public void Simulation20241103()
+	{
+		testConfigAndResult(4);
+	}
+
+	[Test]
+	public void Simulation20241108()
+	{
+		testConfigAndResult(5);
+	}
+
 	private static void testConfigAndResult(Int32 id)
 	{
 		var config = Config.Init($"config_{id}");

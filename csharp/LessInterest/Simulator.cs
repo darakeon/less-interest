@@ -26,13 +26,17 @@ public class Simulator(
 		Single[] balancesPt, Single nubankLimit, Single c6Limit, String multiKey
 	)
 	{
-		return await oneOrAll(
+		var chosen = await oneOrAll(
 			async (count, delay) => await process(
 				balancesPt, nubankLimit, c6Limit, multiKey, count, delay
 			),
 			0,
 			multiKey
 		);
+
+		chosen.Print(write);
+
+		return chosen;
 	}
 
 	private async Task<ISimulation> process(
@@ -78,7 +82,7 @@ public class Simulator(
 		    && config.InitialInstallmentsCounts[monthIndex] == installmentCount
 		    && config.InitialInstallmentsDelays[monthIndex] == installmentDelay;
 
-		if (isTarget || monthIndex < 5)
+		if (isTarget || monthIndex < 2)
 		{
 			write($"{new String('-', monthIndex + 1)} {DateTime.Now:HH:mm:ss:fff} {simulation.MonthLabel} {installmentCount:00}x after {installmentDelay} months:");
 		}
@@ -103,7 +107,7 @@ public class Simulator(
 
 		simulation.BalancePTFinal =
 			simulation.BalancePTInitial
-			+ config.Salary[monthIndex]
+			+ config.SalaryPT[monthIndex]
 			- config.SpentPT[monthIndex];
 
 		simulation.BalancePTBR =
@@ -111,8 +115,14 @@ public class Simulator(
 
 		simulation.ReInstallments = reInstallments[monthIndex];
 
+		var salaryBR =
+			config.SalaryBR?.Length > monthIndex
+				? config.SalaryBR[monthIndex]
+				: 0;
+
 		simulation.BalanceBR =
 			config.SpentBR[monthIndex]
+			- salaryBR
 			+ nubankInstallments
 			+ c6Installments
 			+ reInstallments[monthIndex];
@@ -175,7 +185,7 @@ public class Simulator(
 
 		if (nextMonthIndex == config.Months.Length)
 		{
-			simulation.Print(write);
+			//simulation.Print(write);
 			return simulation;
 		}
 
@@ -206,13 +216,23 @@ public class Simulator(
 		if (!firstSimulation.NeedReInstallment(monthIndex))
 			return firstSimulation;
 
-		var simulationTasks = new Task<ISimulation>[35];
+		var maxCount =
+			config.InstallmentCountLimits?.Length > monthIndex
+				? config.InstallmentCountLimits[monthIndex]
+				: 12;
 
-		for (Int16 delay = 0; delay <= 2; delay++)
+		var maxDelay =
+			config.InstallmentDelayLimits?.Length > monthIndex
+				? config.InstallmentDelayLimits[monthIndex]
+				: 2;
+
+		var simulationTasks = new Task<ISimulation>[maxCount*(maxDelay+1)-1];
+
+		for (Int16 delay = 0; delay <= maxDelay; delay++)
 		{
-			for (Int16 count = 1; count <= 12; count++)
+			for (Int16 count = 1; count <= maxCount; count++)
 			{
-				var index = delay * 12 + count - 2;
+				var index = delay * maxCount + count - 2;
 
 				if (index < 0)
 					continue;

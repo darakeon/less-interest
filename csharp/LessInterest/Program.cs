@@ -4,7 +4,7 @@ public class Program
 {
 	public static void Main(String[] args)
 	{
-		var configFile = "config_3";
+		var configFile = "config_5";
 		var config = Config.Init(configFile);
 
 		var balancesPt = config.GenerateBalancesPT();
